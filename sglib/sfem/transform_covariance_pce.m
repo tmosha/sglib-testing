@@ -58,7 +58,7 @@ check_unsupported_options( options, mfilename );
 % if the pce is stationary precompute the transformation polynomial
 if size(pcc_u,1)==1
     stationary=true;
-    p=gen_cov_poly( pcc_u, 1, 1 );
+    p=gen_cov_poly( pcc_u, 1, 1 ); %polynomial coeffs from hermite base to monomial base
 else
     stationary=false;
 end

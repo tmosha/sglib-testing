@@ -14,7 +14,8 @@ check_unsupported_options(options,mfilename);
 if projection_method
     %, 'eps' kl_eps
     C=covariance_matrix( pos, cov_r_func );
-    v_r_i=kl_solve_evp( C, G_N, l_r );
+    v_r_i=kl_solve_evp( C, G_N, l_r );      %eigentlich ein Basiswechsel auf kl-Basis anderer Kovarianz
+    %oder r_i_alpha ist gar nicht raeumliche Faktoren der KL.
     [r_i_k,r_k_alpha]=project_pce_on_kl( r_i_alpha, I_r, v_r_i );
 else
     [r_i_k,r_k_alpha]=pce_to_kl( r_i_alpha, I_r, l_r, G_N );

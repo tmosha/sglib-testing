@@ -72,7 +72,7 @@ options=varargin2options( varargin );
 check_unsupported_options( options, mfilename );
 
 
-% Step 1: calculate the rho_k(pos) numerically
+% Step 1: calculate the rho_k(pos) (Koeffs der pce, non-spatial) numerically
 rho_k=pce_expand_1d(rho_stdnor_func,p_trans);
 if m_gam==0
     r_j_alpha=repmat(rho_k(1), size(pos,2), 1);
@@ -94,7 +94,7 @@ else
         transform_options=struct2options(transform_options);
     end
     C_gam=transform_covariance_pce( C_r, rho_k, transform_options{:} );
-end
+end  
 
 % Step 3: Calculate lamda_i and r_i (i.e. do KL expansion)
 % g contains the product sqrt(lambda_i)*g_i of the KL of gamma
@@ -105,11 +105,12 @@ g_j_i=kl_solve_evp( C_gam, G_N, m_gam, kl_options );
 % this was implicit in step 3
 
 % Step 5: transform gam(pos) into u
-[r_j_alpha,I_r]=pce_transform_multi( g_j_i, rho_k );
+[r_j_alpha,I_r]=pce_transform_multi( g_j_i, rho_k ); %trafo Koeffs rho der PC von rho_stdnor_func in KL
 
 
 % Replace the mean
 if ~isempty(mean_func)
     r_i_mean=funcall( mean_func, pos );
-    r_i_alpha(:,1)=r_i_mean;
+    r_i_alpha(:,1)=r_i_mean;%r_j_alpha??????????
+%    r_i_alpha(:,1)=r_i_mean;
 end

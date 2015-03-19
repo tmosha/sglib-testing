@@ -69,7 +69,7 @@ u = [xt; vt];
 % vt = v0 * cos(omega*T) - x0 * omega * sin(omega*T);
 %log10(abs(u))'
 
-
+%wieso undamped?
 function [dudt] = undamped_spring_ode(t, u, k, m, d)
 x = u(1);
 v = u(2);

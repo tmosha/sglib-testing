@@ -12,7 +12,7 @@ init_func = @()(undamped_spring_init('T', 20, 'd', 0.1));
 polysys = 'p';
 
 %% Monte Carlo
-
+if 0
 N = 100;
 [u_mean, u_var] = compute_moments_mc(init_func, solve_func, polysys, N);
 show_mean_var('Monte-Carlo', u_mean, u_var)
@@ -26,7 +26,7 @@ show_mean_var('Quasi Monte-Carlo', u_mean, u_var)
 
 [u_mean, u_var] = compute_moments_mc(init_func, solve_func, polysys, N, 'mode', 'lhs');
 show_mean_var('Latin hypercube', u_mean, u_var)
-
+end
 %% Direct integration full tensor grid
 
 p = 5;

@@ -328,6 +328,7 @@ plot_response_surface_results
 % method.
 p_int = max(V_u{2}(:))+1;
 int_grid = 'full_tensor';
+maxiter=15;
 [u_i_alpha, model, x, w]=compute_response_surface_nonintrusive_galerkin(model, a_i_alpha, V_a, V_u, p_int, 'maxiter', maxiter, 'grid', int_grid);
 
 plot_response_surface_results

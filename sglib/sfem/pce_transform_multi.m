@@ -61,7 +61,7 @@ if ~fast
         for j=1:m
             alpha_j=alpha(j);
             if alpha_j~=0
-                fun=fun .* g(:,j).^alpha_j;
+                fun=fun .* g(:,j).^alpha_j;%macht die multivar. Ansatzfkt.
             end
         end
         u_alpha(:,i)=factor*fun;
