@@ -27,12 +27,12 @@ coeff3=0.3	%lower square
 
 for i =1:size(pos, 2)
 	if pos(1,i)<0
-		val(i) = coeff1
+		val(i) = coeff1;
 	else
 		if pos(2,i)<0
-			val(i)=coeff3
-		else
-			val(i)=coeff2
+			val(i)=coeff3;
+        else
+			val(i)=coeff2;
 		end
 	end
 end

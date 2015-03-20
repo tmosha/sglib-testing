@@ -1,4 +1,4 @@
-%clear
+clear
 
 %% load or create the geomatry
 % !!! pos, els, G_N (kann auch stattdessen I sein) und stiffness_func
@@ -30,7 +30,7 @@ mean_k_func = {@blockwise_const_coeff}
 stdnor_k=funcreate(@gendist_stdnor, @funarg, dist_k); %F^-1_beta(F_erf(x))
 
 % define the covariance of the field
-lc_k=get_base_param( 'lc_k', 0.3 );
+lc_k=get_base_param( 'lc_k', 0.0000000000001);%0.3 0.2 0.001
 cov_k_func=get_base_param( 'cov_k_func', @gaussian_covariance );
 cov_k=get_base_param( 'cov_k', {cov_k_func,{lc_k,1}} );
 
@@ -143,7 +143,7 @@ u_i_alpha=apply_boundary_conditions_solution( Ui_mat, ctensor_to_array(G), P_I, 
 [f]=kl_pce_field_realization( f_i_k, f_k_alpha, I_f, xi );
 [g]=kl_pce_field_realization( g_i_k, g_k_alpha, I_g, xi );
 
-
+figure;
 % plot solutions fields and difference
 mh=multiplot_init(2,2);
 opts={'view', 3};

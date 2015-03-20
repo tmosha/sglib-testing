@@ -110,7 +110,7 @@ g_j_i=kl_solve_evp( C_gam, G_N, m_gam, kl_options );
 
 % Replace the mean
 if ~isempty(mean_func)
-    r_i_mean=funcall( mean_func, pos );
-    r_i_alpha(:,1)=r_i_mean;%r_j_alpha??????????
+    r_j_mean=funcall( mean_func, pos );
+    r_j_alpha(:,1)=r_j_mean;%r_j_alpha??????????
 %    r_i_alpha(:,1)=r_i_mean;
 end
