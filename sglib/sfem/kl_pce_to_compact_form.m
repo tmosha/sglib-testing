@@ -1,7 +1,13 @@
 function [rc_i_k,rc_k_alpha]=kl_pce_to_compact_form(mu_rs_i,rs_i_k,sigma_rs_k,rs_k_alpha)
 % KL_PCE_TO_COMPACT_FORM Short description of kl_pce_to_compact_form.
 %   KL_PCE_TO_COMPACT_FORM Long description of kl_pce_to_compact_form.
-%
+% mu_rs_i, 
+%rs_i_k, KLE eigenfunction
+% sigma_rs_k,
+% rs_k_alpha: Coeffs w.r.t. KL base 
+%Output:
+%rc_i_k: scaled KLE eigenfunctions with mean added as first EFunction
+%rc_k_alpha: Coefficients w.r.t. KL base with some extra block -  
 % Example (<a href="matlab:run_example kl_pce_to_compact_form">run</a>)
 %
 % See also

@@ -32,7 +32,7 @@ l_k=get_base_param( 'l_k', 10 );
 %dist_k=get_base_param( 'dist_k', 
 a1Dist =gendist_create('beta', {4,2}, 'shift', 0.1)% );
 %a_alpha: Koeffs der Reihe, V1 - Basisfkt'en
-[pcCoeff1, pcBase1] = gpc_param_expand(a1Dist, 'h', 'p', 3);%h: Hermite, 'fixvar', true);
+[pcCoeff1, pcBase1] = gpc_param_expand(a1Dist, 'H', 'p', 3);%h: Hermite, 'fixvar', true);
 %invcdf-Zeugs ist darin eingebaut.
 %cov_k_func=get_base_param( 'cov_k_func', @gaussian_covariance );
 %cov_k=get_base_param( 'cov_k', {cov_k_func,{lc_k,1}} );
@@ -42,35 +42,39 @@ a1Dist =gendist_create('beta', {4,2}, 'shift', 0.1)% );
 %r_k_alpha: Coefficients w.r.t. KL EF base with some extra block due to first EV  
 a2Dist =gendist_create('beta', {4,2}, 'shift', 0.1)% );
 %a_alpha: Koeffs(x) der Reihe, V1 - Basisfkt'en
-[pcCoeff2, pcBase2] = gpc_param_expand(a2Dist, 'h', 'p', 3);%,);
+[pcCoeff2, pcBase2_] = gpc_param_expand(a2Dist, 'H', 'p', 3);%,);
 
 a3Dist =gendist_create('beta', {4,2}, 'shift', 0.1)% );
-[pcCoeff3, pcBase3] = gpc_param_expand(a3Dist, 'h', 'p', 3);%,);
+[pcCoeff3, pcBase3] = gpc_param_expand(a3Dist, 'H', 'p', 3);%,);
  
 [coeff_tmp, base_tmp]=gpc_combine_inputs(pcCoeff1, pcBase1, pcCoeff2, pcBase2);
-[pcCoeff, pcBase]    =gpc_combine_inputs(coeff_tmp, base_tmp, pcCoeff3, pcBase3);
+[pcCoeff_k_alpha, pcBase_k]    =gpc_combine_inputs(coeff_tmp, base_tmp, pcCoeff3, pcBase3);
 %________________________________________________________________________
 %%Visualisation of distribution(s)
 a_i_samples = gpc_sample(coeff_tmp, base_tmp, 30000, 'mode', 'qmc');
 plot_samples(a_i_samples); enhance_plot;
 %Dimension fehlt, fuer 2d gemacht:
-a_i_samples = gpc_sample(pcCoeff, pcBase, 30000, 'mode', 'qmc');
+a_i_samples = gpc_sample(pcCoeff_k_alpha, pcBase_k, 30000, 'mode', 'qmc');
 plot_samples(a_i_samples); enhance_plot;
 
 if 1
-spatialFcts = zeros(size(pos,2),size(pcCoeff,1))
+spatialFcts_i_k = zeros(size(pos,2),size(pcCoeff_k_alpha,1))
 for i =1:size(pos, 2)
 	if pos(1,i)<0
-		spatialFcts(i,1) = 1;
+		spatialFcts_i_k(i,1) = 1;
 	else
 		if pos(2,i)<0
-			spatialFcts(i,3)=1;
+			spatialFcts_i_k(i,3)=1;
         else
-			spatialFcts(i,2)=1;
+			spatialFcts_i_k(i,2)=1;
 		end
 	end
 end
 end
+
+x=kl_pce_field_realization(spatialFcts_i_k, pcCoeff_k_alpha, pcBase_k{2})
+plot_field(pos, els, x )
+[meanFreeCoeff, spatialFcts_i_k]=makePcMeanFree(pcCoeff_k_alpha, spatialFcts_i_k);
 %% construct the right hand side random field f 
 % define stochastic expansion parameters
 p_f=get_base_param( 'p_f', 2 );
@@ -125,7 +129,7 @@ end
 p_u=get_base_param('p_u', max([p_k,p_f,p_g]));
 
 %[I_k,I_f,I_g,I_u]=multiindex_combine( {I_k, I_f, I_g}, p_u );
-[I_k,I_f,I_g,I_u]=multiindex_combine( {pcBase{2}, I_f, I_g}, p_u );
+[I_k,I_f,I_g,I_u]=multiindex_combine( {pcBase_k{2}, I_f, I_g}, p_u );
 M=size(I_u,1);
 I_RHS=I_u; % for 3way this would be I_k
 I_OP=I_u;  % for 3way this would be combine( I
@@ -147,7 +151,7 @@ G=kl_to_ctensor( g_i_k, g_k_beta );
 % create tensor operators
 verbosity=get_base_param( 'verbosity', 1 );
 t_klop=tic;
-K=kl_pce_compute_operator_fast(spatialFcts, pcCoeff, I_k, I_OP, stiffness_func, 'tensor');
+K=kl_pce_compute_operator_fast(spatialFcts_i_k, meanFreeCoeff, I_k, I_OP, stiffness_func, 'tensor');
 %K=kl_pce_compute_operator_fast(k_i_k, k_k_alpha, I_k, I_OP, stiffness_func, 'tensor');
 %KL-EVs, KL-Koeffs. Inputs muessen keine KL-Zerlegung sein, bloss raeuml. Basis
 %??K=compute_pce_operator( K_I_IOTA, I_K, I_U, STIFFNESS_FUNC, FORM)
@@ -179,7 +183,7 @@ toc; fprintf( 'Flag: %d, iter: %d, relres: %g \n', flag, info.iter, info.relres 
 u_i_alpha=apply_boundary_conditions_solution( Ui_mat, ctensor_to_array(G), P_I, P_B );
 [u,xi]=pce_field_realization( u_i_alpha, I_u );
 
-[k]=kl_pce_field_realization(spatialFcts, pcCoeff, I_k, xi );
+[k]=kl_pce_field_realization(spatialFcts_i_k, meanFreeCoeff, I_k, xi );
 [f]=kl_pce_field_realization( f_i_k, f_k_alpha, I_f, xi );
 [g]=kl_pce_field_realization( g_i_k, g_k_alpha, I_g, xi );
 

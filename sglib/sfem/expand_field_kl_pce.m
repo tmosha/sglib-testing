@@ -9,15 +9,16 @@ check_unsupported_options(options,mfilename);
 
 
 [r_i_alpha, I_r]=expand_field_pce_sg( r_stdnor_func, cov_r_func, cov_gam_func, pos, G_N, p_r, m_r, 'mean_func', mean_func );
-
+%raeumlich pktweise Koeffs der PC-Entwicklung, berechnet per NORTA 
 
 if projection_method
     %, 'eps' kl_eps
     C=covariance_matrix( pos, cov_r_func );
-    v_r_i=kl_solve_evp( C, G_N, l_r );      %eigentlich ein Basiswechsel auf kl-Basis anderer Kovarianz
-    %oder r_i_alpha ist gar nicht raeumliche Faktoren der KL.
-    [r_i_k,r_k_alpha]=project_pce_on_kl( r_i_alpha, I_r, v_r_i );
+    v_r_i=kl_solve_evp( C, G_N, l_r );      
+    [r_i_k,r_k_alpha]=project_pce_on_kl( r_i_alpha, I_r, v_r_i );%Projektion der PC_Koeffs auf KL-Eigenfkt'en
 else
     [r_i_k,r_k_alpha]=pce_to_kl( r_i_alpha, I_r, l_r, G_N );
 end
+%r_i_k: scaled KLE eigenfunctions with mean added as first EFunction
+%r_k_alpha: Coefficients w.r.t. KL EF base with some extra block due to first EV  
 

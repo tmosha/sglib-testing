@@ -24,13 +24,13 @@ l_k=get_base_param( 'l_k', 10 );
 % define the distribution (name, parameters, shift, scale)
 dist_k=get_base_param( 'dist_k', gendist_create('beta', {4,2}, 'shift', 0.1) );
 
-%mean_k_func=get_base_param( 'mean_k_func', @blockwise_const_coeff);%[] );
+mean_k_func=get_base_param( 'mean_k_func', [] );
 %as long as i do not understand how to use get_base_param:
-mean_k_func = {@blockwise_const_coeff}
+%geht: mean_k_func = {@blockwise_const_coeff}
 stdnor_k=funcreate(@gendist_stdnor, @funarg, dist_k); %F^-1_beta(F_erf(x))
 
 % define the covariance of the field
-lc_k=get_base_param( 'lc_k', 0.0000000000001);%0.3 0.2 0.001
+lc_k=get_base_param( 'lc_k', 0.05);%0.3 0.2 0.001
 cov_k_func=get_base_param( 'cov_k_func', @gaussian_covariance );
 cov_k=get_base_param( 'cov_k', {cov_k_func,{lc_k,1}} );
 

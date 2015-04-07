@@ -35,5 +35,7 @@ rs_i_k=row_col_mult( v_i_k, 1./sigma_k );
 % Now do the projection. Since the v_i_k are normalized this amounts to just a
 % scalar product between the PCE coefficients and the v_i_k's.
 rs_k_alpha=rs_i_k'*r_i_alpha;
-
+                    %
 [r_i_k, r_k_alpha]=kl_pce_to_compact_form( mu_rs_i, rs_i_k, [], rs_k_alpha );
+%r_i_k: scaled KLE eigenfunctions with mean added as first EFunction
+%r_k_alpha: Coefficients w.r.t. KL base with some extra block due to first EV  
