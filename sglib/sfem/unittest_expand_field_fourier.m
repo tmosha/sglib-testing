@@ -99,7 +99,8 @@ degY=10
 degX=min(degX, size(gridX,2)/2) 
 degY=min(degY, size(gridY,2)/2)
 %1.----------------
-y = ones(size(gridX,2),size(gridY,2)); %cos(i*2*pi*pos)
+%xlaeuft in Zeilenrichtung, y in spaltenricht.
+y = ones(size(gridY,2),size(gridX,2)); %cos(i*2*pi*pos)
 abstol=15/min(size(gridX,2),size(gridY,2));
 reltol=1/min(size(gridX,2),size(gridY,2));
 if 1
@@ -116,22 +117,22 @@ assert_equals( spatialBasis_(1,1,:), ones(1,1,size(gridX,2)*size(gridY,2))...
         , 'reltol', reltol);
 end
 
-%2.-----------------
+%2.------------------------------------------------------------------------
 if 1
 clear y Coeff_  spatialBasis_;
 [X,~] = meshgrid(gridX,gridY);
- f= cos(2*pi*(X*3)); 
+ f= cos(2*pi*(X*3)/(gridX(end)-gridX(1))); 
 %muss laut   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(2*pi*(X*(k1-1)+Y*(k2-1))), nPts,1); 
 %einen Koeff 
 expected_res = zeros(degX, 2*degY);
-expected_res(4,1)=1;
+expected_res(1,7)=1;
 %geben:
 [ Coeff_, spatialBasis_]=expand_field_fourier2d(  f, gridX, gridY, degX, degY);
 %backTrafo = sum(Coeff_.*spatialBasis_;
 %surf()
 assert_equals( Coeff_, expected_res, '2d-ft of const','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
-assert_equals( spatialBasis_(4,1,:), reshape(f, [],1)...
+assert_equals( spatialBasis_(4,1,:), reshape(f, 1,1,[])...
         , '2d-ft of cosine','abstol', abstol...
         , 'reltol', reltol);
 end
