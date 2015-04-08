@@ -1,7 +1,8 @@
 function [ coeff_,  spatialBasis_]=expand_field_fourier( ... %rho_stdnor_func,...
     func,... %cov_gam_func, 
 pos, deg) %G_N, p, m_gam, varargin )
-% EXPAND_FIELD_Fourier Compute the Fourier expansion of an arbitrary Fct.
+% EXPAND_FIELD_Fourier Compute the Fourier expansion of an arbitrary real(!) Fct.
+%   adapted to sglib context.
 %   [coeff_,  spatialBasis_]=EXPAND_FIELD_PCE_SG( func,pos, deg) ) 
 %   computes the Fourier specified by the arguments 
 %   FUNC:Vector of function values 
@@ -12,15 +13,16 @@ pos, deg) %G_N, p, m_gam, varargin )
 %                    N
 %    X(k) =  2* 1/N   sum  x(n)*exp(-j*2*pi*(k-1)*(n-1)/N), 1 <= k <= N.
 %                    n=1
-%   Note: The Factor 2* is theoretically unjustified here!
+%   Note: The Factor 2* is due to summation beginning at 1 instead of -inf!
 %   SpatialBasis contains the functions 1, sin x, cos x, sin2x... evaluated 
 %   at x determined by pos. This is necessary as KL expansion returns the same and following
 %   functions need it.
-%   The inverse is then computed by
+%   The inverse is then computed by spatialBasis_*coeff_,
+%   instead of
 %                     N
 %       x(n) = (1/N) sum  X(k)*exp( j*2*pi*(k-1)*(n-1)/N), 1 <= n <= N.
 %                    k=1
-
+%
 %
 % Options
 %   transform_options: {'correct_var', true}
@@ -58,7 +60,6 @@ pos, deg) %G_N, p, m_gam, varargin )
 
 
 %check_condition( rho_stdnor_func, 'isfunction', false, 'rho_stdnor_func', mfilename );
-%check_condition( func, 'isfunction', false, 'cov_r_func', mfilename );
 
 check_range( size(pos,1), 1, 3, 'sizeof(pos,1)', mfilename );
 % nicht noetig: check_range( deg, 1, 10, 'deg', mfilename );
@@ -70,29 +71,15 @@ N=size(pos,2);
 %check_range( m_gam, 0, 1000, 'm_gam', mfilename );
 deg=min(deg,N);
 F=fft(func);%,NFFT);
-%Intervall-Trafo:
-b=pos(end)-pos(1)
+
 coeff_=zeros(2*deg-1,1);
- coeff_(1)          =real(F(1))/N;  %const. Basis
- coeff_(2:2:end-1)  =real(F(2:deg))./N; %cosinus
- coeff_(3:2:end)    =-imag(F(2:deg))./N; %sinus
+ coeff_(1)          =  real(F(1))/N;  %const. Basis
+ coeff_(2:2:end-1)  =2*real(F(2:deg))./N; %cosinus
+ coeff_(3:2:end)    =-2*imag(F(2:deg))./N; %sinus
 spatialBasis_= zeros(size(pos,2),size(coeff_,1));
 spatialBasis_(:,1)=1;
-for i=2:2:size(coeff_,1)
+for i=2:2:deg%size(coeff_,1)
    spatialBasis_(:,i)=cos(2*pi*pos*(i/2)); 
    spatialBasis_(:,i+1)=sin(2*pi*pos*(i/2)); 
 end
-% Step 2: calculate <gam_i gam_j> from <u_i u_j>
-%C_r=covariance_matrix( pos, cov_r_func );
-%if ~isempty( cov_gam_func )
-%    C_gam=covariance_matrix( pos, cov_gam_func );
-%else
-%    if isstruct(transform_options)
-%        transform_options=struct2options(transform_options);
-%    end
-%    C_gam=transform_covariance_pce( C_r, rho_k, transform_options{:} );
-%end 
-
-% Step 3: Calculate lamda_i and r_i (i.e. do KL expansion)
-% g contains the product sqrt(lambda_i)*g_i of the KL of gamma
  
