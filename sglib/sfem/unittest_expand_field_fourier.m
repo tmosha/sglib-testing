@@ -1,5 +1,6 @@
 function unittest_expand_field_fourier
-% UNITTEST_EXPAND_FIELD_FOURIER Test the EXPAND_FIELD_FOURIER function.
+% UNITTEST_EXPAND_FIELD_FOURIER Test the EXPAND_FIELD_FOURIER and 
+% EXPAND_FIELD_FOURIER2D function.
 %
 % Example (<a href="matlab:run_example unittest_">run</a>)
 %   unittest_
@@ -7,7 +8,7 @@ function unittest_expand_field_fourier
 % Calculates 1-D fourier transform
 % See also EXPAND_FIELD_FOURIER, MUNIT_RUN_TESTSUITE 
 
-%   Elmar Zander
+%   T.Moshagen
 %   Copyright 2010, Inst. of Scientific Computing, TU Braunschweig
 %
 %   This program is free software: you can redistribute it and/or modify it
@@ -89,7 +90,7 @@ end
 
 
 
-function [spatialBasis_, Coeff_]=compute_fft2d()
+function [spatialBase_, coeff_]=compute_fft2d()
 gridX = 0:0.02:4;
 gridY = 0:0.02:3;
 degX=10
@@ -105,13 +106,13 @@ reltol=1/min(size(gridX,2),size(gridY,2));
 if 1
 expected_res = zeros(degX, 2*degY);
 expected_res(1,1)=1;
-[ Coeff_, spatialBasis_]=expand_field_fourier2d(  y, gridX, gridY, degX, degY);
+[ coeff_, spatialBase_]=expand_field_fourier2d(  y, gridX, gridY, degX, degY);
 
 %backTrafo = sum(Coeff_.*spatialBasis_;
 %surf()
-assert_equals( Coeff_, expected_res, '2d-ft of const f=1','abstol', abstol,...
+assert_equals( coeff_, expected_res, '2d-ft of const f=1','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
-assert_equals( spatialBasis_(1,1,:), ones(1,1,size(gridX,2)*size(gridY,2))...
+assert_equals( spatialBase_(1,1,:), ones(1,1,size(gridX,2)*size(gridY,2))...
         , '2d-ft of const','abstol', abstol...
         , 'reltol', reltol);
 end
@@ -126,12 +127,14 @@ clear y Coeff_  spatialBasis_;
 expected_res = zeros(degX, 2*degY);
 expected_res(1,7)=1;
 %geben:
-[ Coeff_, spatialBasis_]=expand_field_fourier2d(  f, gridX, gridY, degX, degY);
-%backTrafo = sum(Coeff_.*spatialBasis_;
-%surf(reshape(spatialBasis_(4,1,:),size(X)))
-assert_equals( Coeff_, expected_res, '2d-ft of cos(2*pi*(X*3)/(gridX(end)-gridX(1))','abstol', abstol,...
+[ coeff_, spatialBase_]=expand_field_fourier2d(  f, gridX, gridY, degX, degY);
+
+surf(reshape(spatialBase_(4,1,:),size(X)))
+backTrafo=inverseFourier(coeff_, spatialBase_);
+surf(reshape(backTrafo,size(X)));
+assert_equals( coeff_, expected_res, '2d-ft of cos(2*pi*(X*3)/(gridX(end)-gridX(1))','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
-assert_equals( spatialBasis_(4,1,:), reshape(f, 1,1,[])...
+assert_equals( spatialBase_(4,1,:), reshape(f, 1,1,[])...
         , '2d-ft of cosine','abstol', abstol...
         , 'reltol', reltol);
 end
@@ -145,15 +148,28 @@ clear y f Coeff_  spatialBasis_;
 expected_res = zeros(degX, 2*degY);
 expected_res(4,7)=1;
 %geben:
-[ Coeff_, spatialBasis_]=expand_field_fourier2d(  f, gridX, gridY, degX, degY);
+[ coeff_, spatialBase_]=expand_field_fourier2d(  f, gridX, gridY, degX, degY);
 
-assert_equals( Coeff_, expected_res, '2d-ft of cos(2*pi* ((X*3)/(gridX(end)-gridX(1))+Y*3/(gridY(end)-gridY(1))))','abstol', abstol,...
+backTrafo=inverseFourier(coeff_, spatialBase_);
+surf(reshape(backTrafo,size(X)));
+
+assert_equals( coeff_, expected_res, '2d-ft of cos(2*pi* ((X*3)/(gridX(end)-gridX(1))+Y*3/(gridY(end)-gridY(1))))','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
-assert_equals( spatialBasis_(4,7,:), reshape(f, 1,1,[])...
+assert_equals( spatialBase_(4,7,:), reshape(f, 1,1,[])...
         , '2d-ft of cosine','abstol', abstol...
         , 'reltol', reltol);
 end
 
+
+function [backTrafo]=inverseFourier(coeff, spatialBase)
+backTrafo=zeros(size(spatialBase,3),1);%stumpf ist trumpf
+for iSpat=1:size(spatialBase,3)
+    for iX=1:size(coeff,1)
+        for iY=1:size(coeff,2)
+            backTrafo(iSpat) = backTrafo(iSpat) + coeff(iX,iY)*spatialBase(iX,iY,iSpat);
+        end
+    end
+end
 
 function [K,K_f]=compute_operators( p_k, m_f, p_f, p_u, lex_sort )
 
