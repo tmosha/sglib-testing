@@ -23,7 +23,6 @@ munit_set_function( 'expand_field_fourier' );
 %[K,K_f]=compute_fft1d( );
 compute_fft2d();
 %bis jetzt kein Sinn in dieser Gliederung - kann evtl aufgegeben werden.
-%assert_equals( K, K_f );
 
 
 function [spatialBasis_, Coeff_]=compute_fft1d()
@@ -110,7 +109,7 @@ expected_res(1,1)=1;
 
 %backTrafo = sum(Coeff_.*spatialBasis_;
 %surf()
-assert_equals( Coeff_, expected_res, '2d-ft of const','abstol', abstol,...
+assert_equals( Coeff_, expected_res, '2d-ft of const f=1','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
 assert_equals( spatialBasis_(1,1,:), ones(1,1,size(gridX,2)*size(gridY,2))...
         , '2d-ft of const','abstol', abstol...
@@ -129,8 +128,8 @@ expected_res(1,7)=1;
 %geben:
 [ Coeff_, spatialBasis_]=expand_field_fourier2d(  f, gridX, gridY, degX, degY);
 %backTrafo = sum(Coeff_.*spatialBasis_;
-%surf()
-assert_equals( Coeff_, expected_res, '2d-ft of const','abstol', abstol,...
+%surf(reshape(spatialBasis_(4,1,:),size(X)))
+assert_equals( Coeff_, expected_res, '2d-ft of cos(2*pi*(X*3)/(gridX(end)-gridX(1))','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
 assert_equals( spatialBasis_(4,1,:), reshape(f, 1,1,[])...
         , '2d-ft of cosine','abstol', abstol...
@@ -140,22 +139,17 @@ end
 if 1
 clear y f Coeff_  spatialBasis_;
 [X,Y] = meshgrid(gridX,gridY);
- f=reshape(cos(2*pi*(X*3+Y*3)), nPts,1); 
+ f=cos(2*pi* ((X*3)/(gridX(end)-gridX(1))+Y*3/(gridY(end)-gridY(1)))); 
 %muss laut   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(2*pi*(X*(k1-1)+Y*(k2-1))), nPts,1); 
 %einen Koeff 
-expected_res = zeros(size( Coeff_));
+expected_res = zeros(degX, 2*degY);
 expected_res(4,7)=1;
 %geben:
 [ Coeff_, spatialBasis_]=expand_field_fourier2d(  f, gridX, gridY, degX, degY);
-y = ones(size(gridX,2),size(gridY,2)); %cos(i*2*pi*pos)
 
-%backTrafo = sum(Coeff_.*spatialBasis_;
-%surf()
-expected_res = zeros(size( Coeff_));
-expected_res(1,1)=1;
-assert_equals( Coeff_, expected_res, '2d-ft of const','abstol', abstol,...
+assert_equals( Coeff_, expected_res, '2d-ft of cos(2*pi* ((X*3)/(gridX(end)-gridX(1))+Y*3/(gridY(end)-gridY(1))))','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
-assert_equals( spatialBasis_(1,1,:), ones(1,1,size(gridX,2)*size(gridY,2))...
+assert_equals( spatialBasis_(4,7,:), reshape(f, 1,1,[])...
         , '2d-ft of cosine','abstol', abstol...
         , 'reltol', reltol);
 end
