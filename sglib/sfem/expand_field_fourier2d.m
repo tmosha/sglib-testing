@@ -62,14 +62,21 @@ nX=size(x,2);
 nY=size(y,2);
 %check_range( deg, 1, N, 'deg', mfilename );
 
-degX=min(degX,nX/2) 
-degY=min(degY,nY/2) 
-F=fft2(func);%,NFFT);
+degX=min(degX,floor(nX/2));
+degY=min(degY,floor(nY/2));
+%symfuc=[func(1, end:-1:1), func(2,1:end)]; 
+%F=fft(symfuc)
+%symmetry? norm(func-func')
+%F=fft2(func);%,NFFT);
+F = fftshift(fftn(ifftshift(func)))
 coeff_=zeros(degX,2*degY);
 % 1 0
 %  cos sin spaltenweise abwechselnd 
 %
 nPts = (nX*nY)
+surf(imag(fftshift(F)+fftshift(F)'))
+surf(real(fftshift(F)))
+surf(real(fftshift(F)+fftshift(F)'))
 for i=1:degY
  coeff_(1:degX, 2*i-1)  =2*real(F(1:degX, i))./nPts; %cosinus
  coeff_(1:degX, 2*i)    =-2*imag(F(1:degX, i))./nPts; %sinus
