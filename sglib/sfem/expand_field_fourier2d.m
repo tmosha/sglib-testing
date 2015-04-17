@@ -68,18 +68,23 @@ degY=min(degY,floor(nY/2));
 %F=fft(symfuc)
 %symmetry? norm(func-func')
 %F=fft2(func);%,NFFT);
-F = fftshift(fftn(ifftshift(func)))
+FCentered = fftshift(fftn(ifftshift(func)));
 coeff_=zeros(degX,2*degY);
+F=fftn(ifftshift(func))
 % 1 0
 %  cos sin spaltenweise abwechselnd 
 %
+FTransp=FCentered'
 nPts = (nX*nY)
-surf(imag(fftshift(F)+fftshift(F)'))
-surf(real(fftshift(F)))
-surf(real(fftshift(F)+fftshift(F)'))
+if 0
+surf(imag(F+F'))
+surf(real(F))
+surf(real(F+F'))
+end
 for i=1:degY
- coeff_(1:degX, 2*i-1)  =2*real(F(1:degX, i))./nPts; %cosinus
- coeff_(1:degX, 2*i)    =-2*imag(F(1:degX, i))./nPts; %sinus
+   % prereal=(F+F');%(1:degX, i)
+ coeff_(1:degX, 2*i-1)  =(real(F(1:degX, i)+F(end:-1:end-degX+1, end-i)))/nPts; %cosinus
+ coeff_(1:degX, 2*i)    =(imag(F(1:degX, i)-F(end:-1:end-degX+1, end-i)))/nPts; %sinus
 end
 coeff_(1,1)          =  real(F(1,1))/nPts;  %const. Basis
 coeff_(1,2)          =  0;  %const.-Anteil hat nichts Ungerades
