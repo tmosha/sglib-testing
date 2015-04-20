@@ -1,6 +1,6 @@
 function [ coeff_,  spatialBasis_]=expand_field_fourier2d( ... %rho_stdnor_func,...
     func,... %cov_gam_func, 
-x,y, degX, degY) %G_N, p, m_gam, varargin )
+x,y, degX, degY) %TODO:, symFlag)  varargin )
 % EXPAND_FIELD_Fourier Compute the Fourier expansion of an arbitrary real(!) Fct.
 %   adapted to sglib context.
 %   [coeff_,  spatialBasis_]=EXPAND_FIELD_PCE_SG( func,pos, deg) ) 
@@ -19,9 +19,9 @@ x,y, degX, degY) %G_N, p, m_gam, varargin )
 %                    n=1
 %   Note: The Factor 2* is due to discrete/finite summation!
 %   SpatialBasis contains the functions 
-%   1,          0,      cos x,      sin x,      sin2x... 
-%   cos y       sin y   cos(x+y)    sin(x+y)    cos(2x +y)
-%   cos (2y)    sin(2y) cos(2x+2y)...
+%    ...  cos(-x)   0           1,          0,      cos x,      sin x,      sin2x... 
+%    ...  cos(-x+y) sin(y)     cos y       sin y   cos(x+y)    sin(x+y)    cos(2x +y)
+%    ...cos(-2x+2y) sin(2y)    cos (2y)    sin(2y) cos(2x+2y)...
 %   evaluated 
 %   at x determined by x,y. This is necessary as e.g. KL expansion returns the same and following
 %   functions need it.
@@ -55,6 +55,8 @@ x,y, degX, degY) %G_N, p, m_gam, varargin )
 % check input parameters
 
 %check_condition( func, 'isfunction', false, 'cov_r_func', mfilename );
+%sowas f. symFlag: options=varargin2options(varargin);
+%[cov_gam_func,options]=get_option( options, 'cov_gam_func', [] );
 
 %check_range( size(pos,1), 1, 3, 'sizeof(pos,1)', mfilename );
 [xMesh,yMesh] = meshgrid(x/(x(end)-x(1)),y/(y(end)-y(1)));
@@ -64,37 +66,56 @@ nY=size(y,2);
 
 degX=min(degX,floor(nX/2));
 degY=min(degY,floor(nY/2));
-%symfuc=[func(1, end:-1:1), func(2,1:end)]; 
-%F=fft(symfuc)
+
 %symmetry? norm(func-func')
 %F=fft2(func);%,NFFT);
 FCentered = fftshift(fftn(ifftshift(func)));
-coeff_=zeros(degX,2*degY);
-F=fftn(ifftshift(func))
-% 1 0
-%  cos sin spaltenweise abwechselnd 
-%
-FTransp=FCentered'
-nPts = (nX*nY)
+%FTransp=FCentered'
+coeff_=zeros(degY,4*degX+1);
+%coeff_=zeros(degX,2*degY);
+F=fftn(ifftshift(func));
+
+
+nPts = (nX*nY);
 if 0
 surf(imag(F+F'))
 surf(real(F))
 surf(real(F+F'))
 end
-for i=1:degY
-   % prereal=(F+F');%(1:degX, i)
- coeff_(1:degX, 2*i-1)  =(real(F(1:degX, i)+F(end:-1:end-degX+1, end-i)))/nPts; %cosinus
- coeff_(1:degX, 2*i)    =(imag(F(1:degX, i)-F(end:-1:end-degX+1, end-i)))/nPts; %sinus
+symFlag=true;
+if symFlag
+midY = floor(size(FCentered,1)/2);
+midX = floor(size(FCentered,2)/2);
+%coeff_(1,2*degX+1)=real(FCentered(midY+1,midX+1))/nPts; %konst. Coeff
+for iX=1: degX
+        coeff_( 1:degY,2*degX + 2*iX-1)  =...
+                (real(FCentered(midY+1:1:midY+degY,midX+ iX)+FCentered(midY:-1:midY-degY+1, midX-iX)))/nPts; %cosinus
+        coeff_( 1:degY,2*degX - 2*(iX-1)+1)  =coeff_( 1:degY,2*degX + 2*iX-1); %nur symm!
+        coeff_( 1:degY,2*degX + 2*iX)  =...
+                (imag(FCentered(midY+1:1:midY+degY,midX+ iX)-FCentered(midY:-1:midY-degY+1, midX-iX)))/nPts; %cosinus
+        coeff_( 1:degY,2*degX - 2*(iX-1))  =coeff_( 1:degY,2*degX + 2*iX);
 end
-coeff_(1,1)          =  real(F(1,1))/nPts;  %const. Basis
-coeff_(1,2)          =  0;  %const.-Anteil hat nichts Ungerades
+end
 
-spatialBasis_= zeros(degX,degY,nPts);
+if 0
+%zu unuebersichtlich, unklar, wie gerade u ungerade Anz. Pkte zu behandeln ist:    
+for i=1: 2*degX+1
+   % prereal=(F+F');%(1:degX, i)
+ coeff_(1:degY,mod(2*degX + 2*(i-1),4*degX )+1)  =...
+                (real(F(1:degY, i)+F(end:-1:end-degY+1, end-i+1)))/nPts; %cosinus
+ coeff_(1:degY,mod(2*degX +2*(i-1)+1, 4*degX)+1)    =...
+                (imag(F(1:degY, i)-F(end:-1:end-degY+1, end-i+1)))/nPts; %sinus
+end
+end
+%coeff_(1,2)          =  0;  %const.-Anteil hat nichts Ungerades
+
+spatialBasis_= zeros(degY,2*degX+1,nPts);
 %spatialBasis_(:,1)=1;
-for k1=1:1:degX
- for k2=1:1:degY
-   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(2*pi*(xMesh*(k1-1)+yMesh*(k2-1))), nPts,1); 
-   spatialBasis_(k1, 2*k2,:)  =reshape(sin(2*pi*(xMesh*(k1-1)+yMesh*(k2-1))), nPts,1);
+for k1=1:1:degY
+ for k2=1:1:2*degX+1
+    kX = k2-degX-1;
+   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(2*pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
+   spatialBasis_(k1, 2*k2,:)  =reshape(sin(2*pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1);
    %M_alpha(k1,:)= [k1,k2]
  end
 end
