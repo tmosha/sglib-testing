@@ -151,7 +151,7 @@ end
 
 %3.------------------------------------------------------------------------
 
-if 1
+if 0
 clear y Coeff_  spatialBasis_;
 gridX = -1:0.02:1;
 gridY = -1:0.02:1;
@@ -178,6 +178,8 @@ end
 %4.------------------------------------------------------------------------
 if 1
 clear y Coeff_  spatialBasis_;
+gridX = -1:0.02:1;
+gridY = -1:0.02:1;
 [X,Y] = meshgrid(gridX,gridY);
  f= sin(2*pi*(Y)/(gridX(end)-gridX(1))); 
 %muss laut   spatialBasis_(,,:)=reshape(cos(2*pi*(X*()+Y*(k2-1))), nPts,1); 

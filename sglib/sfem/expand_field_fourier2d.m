@@ -117,13 +117,13 @@ for k1=1:1:degY
  for k2=1:1:degX
     kX = k2-degX-1;
    spatialBasis_(k1, 2*k2-1,:)=reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
-   spatialBasis_(k1, 2*k2,:)  =reshape(sin(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1);
+   spatialBasis_(k1, 2*k2,:)  =reshape(sin(pi*(xMesh*(kX+1)+yMesh*(k1-1))), nPts,1);
    %M_alpha(k1,:)= [k1,k2]
  end
  for k2=degX+1:1:2*degX+1
     kX = k2-degX-1;
    spatialBasis_(k1, 2*k2-1,:)=reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
-   spatialBasis_(k1, 2*k2,:)  =reshape(sin(pi*(xMesh*(kX+1)+yMesh*(k1-1))), nPts,1);
+   spatialBasis_(k1, 2*k2,:)  =reshape(sin(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1);
    %M_alpha(k1,:)= [k1,k2]
  end
 end
