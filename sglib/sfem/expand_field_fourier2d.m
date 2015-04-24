@@ -1,12 +1,13 @@
-function [ coeff_,  spatialBasis_]=expand_field_fourier2d( ... %rho_stdnor_func,...
-    func,... %cov_gam_func, 
-x,y, degX, degY) %TODO:, symFlag)  varargin )
+function [ coeff_,  spatialBasis_]=expandFieldFourier2dcentered( ... 
+    func,... % x,y, ...  %just confusing
+degX, degY) %TODO:, symFlag)  varargin )
 % EXPAND_FIELD_Fourier Compute the Fourier expansion of an arbitrary real(!) Fct.
 %   adapted to sglib context.
 %   [coeff_,  spatialBasis_]=EXPAND_FIELD_PCE_SG( func,pos, deg) ) 
 %   computes the Fourier specified by the arguments 
-%   FUNC:Vector of function values 
-%   X,Y: grid points on domain of func, assumed to be equidistant, as
+%   FUNC: matrix of function values evaluated e.g. at [X,Y] = meshgrid(gridX,gridY);
+%   f=func(X,Y); 
+%   Old: X,Y: grid points on domain of func, assumed to be equidistant, as
 %   needed by MESHGRID, used to evaluate the fourier basis 
 %   b_k=exp(-2*pi*i*<k,x>)
 %   DEGX, DEGY: number of coefficients and  basis functions returned.
@@ -59,9 +60,9 @@ x,y, degX, degY) %TODO:, symFlag)  varargin )
 %[cov_gam_func,options]=get_option( options, 'cov_gam_func', [] );
 
 %check_range( size(pos,1), 1, 3, 'sizeof(pos,1)', mfilename );
-[xMesh,yMesh] = meshgrid(x/(x(end)-x(1)),y/(y(end)-y(1)));
-nX=size(x,2);
-nY=size(y,2);
+nX=size(func,2);
+nY=size(func,1);
+
 %check_range( deg, 1, N, 'deg', mfilename );
 
 degX=min(degX,floor(nX/2));
@@ -69,11 +70,12 @@ degY=min(degY,floor(nY/2));
 
 %symmetry? norm(func-func')
 %F=fft2(func);%,NFFT);
+
 FCentered = fftshift(fftn(ifftshift(func)));
 %FTransp=FCentered'
 coeff_=zeros(degY,4*degX+1);
 %coeff_=zeros(degX,2*degY);
-F=fftn(ifftshift(func));
+%F=fftn(ifftshift(func));
 
 
 nPts = (nX*nY);
@@ -86,17 +88,17 @@ symFlag=true;
 if symFlag
 midY = floor(size(FCentered,1)/2);
 midX = floor(size(FCentered,2)/2);
-%coeff_(1,2*degX+1)=real(FCentered(midY+1,midX+1))/nPts; %konst. Coeff
+coeff_(:,2*degX+1)=real(FCentered(midY+1:1:midY+degY,midX+1))/nPts; %konst. Coeff
 for iX=1: degX
-        coeff_( 1:degY,2*degX + 2*iX-1)  =...
-                (real(FCentered(midY+1:1:midY+degY,midX+ iX)+FCentered(midY:-1:midY-degY+1, midX-iX)))/nPts; %cosinus
-        coeff_( 1:degY,2*degX - 2*(iX-1)+1)  =coeff_( 1:degY,2*degX + 2*iX-1); %nur symm!
         coeff_( 1:degY,2*degX + 2*iX)  =...
-                (imag(FCentered(midY+1:1:midY+degY,midX+ iX)-FCentered(midY:-1:midY-degY+1, midX-iX)))/nPts; %cosinus
-        coeff_( 1:degY,2*degX - 2*(iX-1))  =coeff_( 1:degY,2*degX + 2*iX);
+                (imag(-FCentered(midY+1:1:midY+degY,midX+ iX+1)+FCentered(midY:-1:midY-degY+1, midX-iX+2)))/nPts; %sinus
+        coeff_( 1:degY,2*degX - 2*(iX-1))  =    -coeff_( 1:degY,2*degX + 2*iX);
+        coeff_( 1:degY,2*degX + 2*iX+1)  =...
+                (real(FCentered(midY+1:1:midY+degY,midX+ iX+1)+FCentered(midY:-1:midY-degY+1, midX-iX+1)))/nPts; %cosinus
+        coeff_( 1:degY,2*degX - 2*(iX-1)-1)  =coeff_( 1:degY,2*degX + 2*iX+1); %nur symm!
 end
 end
-
+%Remark: columns 1 and end belong to cosine().
 if 0
 %zu unuebersichtlich, unklar, wie gerade u ungerade Anz. Pkte zu behandeln ist:    
 for i=1: 2*degX+1
@@ -107,19 +109,25 @@ for i=1: 2*degX+1
                 (imag(F(1:degY, i)-F(end:-1:end-degY+1, end-i+1)))/nPts; %sinus
 end
 end
-%coeff_(1,2)          =  0;  %const.-Anteil hat nichts Ungerades
-
+%centered - (0,0) is middle of domain - data assumed!
+[xMesh,yMesh] = meshgrid(linspace(-1,1,nX),linspace(0,1,nY));%y/(y(end)-y(1)));
 spatialBasis_= zeros(degY,2*degX+1,nPts);
 %spatialBasis_(:,1)=1;
 for k1=1:1:degY
- for k2=1:1:2*degX+1
+ for k2=1:1:degX
     kX = k2-degX-1;
-   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(2*pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
-   spatialBasis_(k1, 2*k2,:)  =reshape(sin(2*pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1);
+   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
+   spatialBasis_(k1, 2*k2,:)  =reshape(sin(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1);
+   %M_alpha(k1,:)= [k1,k2]
+ end
+ for k2=degX+1:1:2*degX+1
+    kX = k2-degX-1;
+   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
+   spatialBasis_(k1, 2*k2,:)  =reshape(sin(pi*(xMesh*(kX+1)+yMesh*(k1-1))), nPts,1);
    %M_alpha(k1,:)= [k1,k2]
  end
 end
-spatialBasis_(1, 2,:) = zeros(nPts,1);
+%spatialBasis_(1, 2,:) = zeros(nPts,1);
 % Step 2: calculate <gam_i gam_j> from <u_i u_j>
 %C_r=covariance_matrix( pos, cov_r_func );
 %if ~isempty( cov_gam_func )
