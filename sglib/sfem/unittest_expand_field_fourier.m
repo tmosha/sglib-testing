@@ -260,9 +260,9 @@ gridY = -1:0.02:1;
  f=cos(2*pi* ((X)/(gridX(end)-gridX(1))+Y/(gridY(end)-gridY(1)))); 
 %muss laut   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(2*pi*(X*(k1-1)+Y*(k2-1))), nPts,1); 
 %einen Koeff 
-expected_res = zeros(degX, 2*degY);
-expected_res(2,2*degX+3)=0.5;
-expected_res(2,2*degX-1)=0.5;
+expected_res = zeros(degX, 4*degY+1);
+expected_res(2,2*degX+3)=1.0;
+expected_res(2,2*degX-1)=0.0;
 %geben:
 [ coeff_, spatialBase_]=expand_field_fourier2d(  f, degX, degY);
 
@@ -272,7 +272,7 @@ surf(reshape(backTrafo,size(X)));
 assert_equals( coeff_, expected_res, '2d-ft of cos(2*pi* ((X*3)/(gridX(end)-gridX(1))+Y*3/(gridY(end)-gridY(1))))'...
     ,'abstol', abstol*1.5,...
     'reltol', reltol*1.5);
-assert_equals( spatialBase_(4,7,:), reshape(f, 1,1,[])...
+assert_equals( spatialBase_(2,2*degX+3,:), reshape(f, 1,1,[])...
         , '2d-ft of cosine','abstol', abstol...
         , 'reltol', reltol);
 assert_equals( backTrafo, reshape(f, [],1)...

@@ -95,7 +95,8 @@ for iX=1: degX
         coeff_( 1:degY,2*degX + 2*iX+1)  =...
                 (real(FCentered(midY+1:1:midY+degY,midX+ iX+1)+FCentered(midY+1:-1:midY-degY+2, midX-iX+1)))/nPts; %cosinus
 
-            coeff_( 1:degY,2*degX - 2*(iX-1)-1)  =coeff_( 1:degY,2*degX + 2*iX+1); 
+            coeff_( 1:degY,2*degX - 2*(iX-1)-1)  =...
+                (real(FCentered(midY+1:1:midY+degY,midX- iX+1)+FCentered(midY+1:-1:midY-degY+2, midX+iX+1)))/nPts;; 
 end
 
 %Remark: columns 1 and end belong to cosine().
