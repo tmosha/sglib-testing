@@ -87,17 +87,24 @@ end
 
 midY = floor(size(FCentered,1)/2);
 midX = floor(size(FCentered,2)/2);
-coeff_(:,2*degX+1)=(real(FCentered(midY+1:1:midY+degY,midX+1))+[0; FCentered(midY:-1:midY-degY+2, midX+1)])/nPts; %konst. Coeff
+coeff_(:,2*degX+1)=(real(FCentered(midY+1:1:midY+degY,midX+1)+[0; FCentered(midY:-1:midY-degY+2, midX+1)]))/nPts; %konst. Coeff
 for iX=1: degX
         coeff_( 1:degY,2*degX + 2*iX)  =...
-                (imag(-FCentered(midY+1:1:midY+degY,midX+ iX)+FCentered(midY:-1:midY-degY+1, midX-iX+1)))/nPts;%???+2)))/nPts; %sinus
-        coeff_( 1:degY,2*degX - 2*(iX-1))  =    +coeff_( 1:degY,2*degX + 2*iX);
+                (imag(-FCentered(midY+1:1:midY+degY,midX+ iX)  +[0;FCentered(midY:-1:midY-degY+2, midX-iX+2)]))/nPts;%???+2)))/nPts; %sinus
+        coeff_( 1:degY,2*degX - 2*(iX-1))  =   ... 
+                (imag(-FCentered(midY+1:1:midY+degY,midX- iX+2)+[0;FCentered(midY:-1:midY-degY+2, midX+iX)]))/nPts;%???+2)))/nPts; %sinus     
+        %+coeff_( 1:degY,2*degX + 2*iX);
         coeff_( 1:degY,2*degX + 2*iX+1)  =...
-                (real(FCentered(midY+1:1:midY+degY,midX+ iX+1)+FCentered(midY+1:-1:midY-degY+2, midX-iX+1)))/nPts; %cosinus
+                (real(FCentered(midY+1:1:midY+degY,midX+ iX+1)+[0;FCentered(midY:-1:midY-degY+2, midX-iX+1)]))/nPts; %cosinus
 
             coeff_( 1:degY,2*degX - 2*(iX-1)-1)  =...
-                (real(FCentered(midY+1:1:midY+degY,midX- iX+1)+FCentered(midY+1:-1:midY-degY+2, midX+iX+1)))/nPts;; 
+                (real(FCentered(midY+1:1:midY+degY,midX- iX+1)+[0;FCentered(midY:-1:midY-degY+2, midX+iX+1)]))/nPts; 
 end
+%Overwite the sin2py - entries...
+coeff_( 1:degY,2*degX + 2)  =...
+                imag(-FCentered(midY+1:1:midY+degY,midX+ 1))/nPts;%  +[0;FCentered(midY:-1:midY-degY+2, midX-iX+2)]))/nPts;%???+2)))/nPts; %sinus
+coeff_( 1:degY,2*degX    )  =                  (imag(...-FCentered(midY+1:1:midY+degY,midX- iX+2)+
+                            [0;FCentered(midY:-1:midY-degY+2, midX+1)]))/nPts;%???+2)))/nPts; %sinus     
 
 %Remark: columns 1 and end belong to cosine().
 if 0
