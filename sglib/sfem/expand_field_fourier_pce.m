@@ -66,7 +66,7 @@ else
 end  
 %umstrukturieren der
 
-[EV_C_Gam, spatialBasis_]=expand_field_fourier2d(  C_gam, gridX, gridY, degKL, degKL);
+[EV_C_Gam, spatialBasis_]=expandFieldFourier2dcentered(  C_gam,  degKL, degKL);
 % ist separate Wahl v. degX u degY sinnvoll?
 
 % Step 3: Calculate lamda_i and r_i (i.e. do Fourier (KL) expansion)

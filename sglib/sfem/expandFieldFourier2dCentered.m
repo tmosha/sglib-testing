@@ -1,15 +1,12 @@
 function [ coeff_,  spatialBasis_]=expandFieldFourier2dcentered( ... 
-    func,... % x,y, ...  %just confusing
-degX, degY) %TODO:, symFlag)  varargin )
+    func, degX, degY) %  varargin )
 % EXPAND_FIELD_Fourier Compute the Fourier expansion of an arbitrary real(!) Fct.
 %   adapted to sglib context.
 %   [coeff_,  spatialBasis_]=EXPAND_FIELD_PCE_SG( func,pos, deg) ) 
 %   computes the Fourier specified by the arguments 
 %   FUNC: matrix of function values evaluated e.g. at [X,Y] = meshgrid(gridX,gridY);
 %   f=func(X,Y); 
-%   Old: X,Y: grid points on domain of func, assumed to be equidistant, as
-%   needed by MESHGRID, used to evaluate the fourier basis 
-%   b_k=exp(-2*pi*i*<k,x>)
+% to evaluate the 
 %   DEGX, DEGY: number of coefficients and  basis functions returned.
 %       Note:  Independently of degX and degY, all values of FUNC are considered!
 %   TODO: Sparse matrix for the fourier base plus input argument determining the 
@@ -19,7 +16,8 @@ degX, degY) %TODO:, symFlag)  varargin )
 %    X(k) =  2* 1/N   sum  x(n)*exp(-j*2*pi*<k,x>)/N), 1 <= k <= N.
 %                    n=1
 %   Note: The Factor 2* is due to discrete/finite summation!
-%   SpatialBasis contains the functions 
+%   SpatialBasis contains the fourier basis 
+%    functions  b_k=exp(-2*pi*i*<k,x>) sorted into
 %    ...  cos(-x)   0           1,          0,      cos x,      sin x,      sin2x... 
 %    ...  cos(-x+y) sin(y)     cos y       sin y   cos(x+y)    sin(x+y)    cos(2x +y)
 %    ...cos(-2x+2y) sin(2y)    cos (2y)    sin(2y) cos(2x+2y)...
@@ -87,6 +85,7 @@ end
 
 midY = floor(size(FCentered,1)/2);
 midX = floor(size(FCentered,2)/2);
+pause
 coeff_(:,2*degX+1)=(real(FCentered(midY+1:1:midY+degY,midX+1)+[0; FCentered(midY:-1:midY-degY+2, midX+1)]))/nPts; %konst. Coeff
 for iX=1: degX
         coeff_( 1:degY,2*degX + 2*iX)  =...
@@ -103,7 +102,7 @@ end
 %Overwite the sin2py - entries...
 coeff_( 1:degY,2*degX + 2)  =...
                 imag(-FCentered(midY+1:1:midY+degY,midX+ 1))/nPts;%  +[0;FCentered(midY:-1:midY-degY+2, midX-iX+2)]))/nPts;%???+2)))/nPts; %sinus
-coeff_( 1:degY,2*degX    )  =                  (imag(...-FCentered(midY+1:1:midY+degY,midX- iX+2)+
+coeff_( 1:degY,2*degX    )  =                  (imag(...%-FCentered(midY+1:1:midY+degY,midX- iX+2)+
                             [0;FCentered(midY:-1:midY-degY+2, midX+1)]))/nPts;%???+2)))/nPts; %sinus     
 
 %Remark: columns 1 and end belong to cosine().

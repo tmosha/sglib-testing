@@ -22,8 +22,9 @@ clear;
 munit_set_function( 'expand_field_fourier' );
 
 %[K,K_f]=compute_fft1d( );
+%geht: 
 case_indexing_fft2d();
-%ftGaussianCov(1,0.25)
+ftGaussianCov(1,0.25)
 %ftGaussianCov(1,0.5)
 %ftGaussianCov(1,1)
 %ftGaussianCov(2,1)
@@ -98,6 +99,11 @@ end
 
 
 function [spatialBase_, coeff_]=case_indexing_fft2d()
+%Testig the ordering of spatial Basis functions acc. to
+%    ...  cos(-x)   0           1,          0,      cos x,      sin x,      sin2x... 
+%    ...  cos(-x+y) sin(y)     cos y       sin y   cos(x+y)    sin(x+y)    cos(2x +y)
+%    ...cos(-2x+2y) sin(2y)    cos (2y)    sin(2y) cos(2x+2y)...
+%and calculation and corresponting indexing of centered fft coeffs. 
 gridX = 0:0.02:4;
 gridY = 0:0.02:3;
 degX=10
@@ -133,12 +139,11 @@ gridX = -1:0.02:1;
 gridY = -1:0.02:1;
 [X,~] = meshgrid(gridX,gridY);
  f= sin(2*pi*(X)/(gridX(end)-gridX(1))); 
-%muss laut   spatialBasis_(,,:)=reshape(cos(2*pi*(X*()+Y*(k2-1))), nPts,1); 
-% Koeffs 
+%coeffs according to above scheme: 
 expected_res = zeros(degX, 4*degY+1);
 expected_res(1,2*degX+1+3)=0.5;
 expected_res(1,2*degX+1-3)=-0.5;
-%geben:
+%
 [ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
@@ -158,12 +163,11 @@ gridX = -1:0.02:1;
 gridY = -1:0.02:1;
 [X,~] = meshgrid(gridX,gridY);
  f= cos(pi*2*(X*3)/(gridX(end)-gridX(1))); 
-%muss laut   spatialBasis_(,,:)=reshape(cos(2*pi*(X*()+Y*(k2-1))), nPts,1); 
-%einen Koeff 
+%coeffs according to above scheme: 
 expected_res = zeros(degX, 4*degY+1);
 expected_res(1,2*degX+1+6)=0.5;
 expected_res(1,2*degX+1-6)=0.5;
-%geben:
+%
 [ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
 
 surf(reshape(spatialBase_(1,2*degX+7,:),size(X)))
@@ -183,12 +187,11 @@ gridX = -1:0.02:1;
 gridY = -1:0.02:1;
 [X,Y] = meshgrid(gridX,gridY);
  f= sin(2*pi*(Y)/(gridX(end)-gridX(1))); 
-%muss laut   spatialBasis_(,,:)=reshape(cos(2*pi*(X*()+Y*(k2-1))), nPts,1); 
-% Koeffs 
+%coeffs according to above scheme: 
 expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+2)=0.5;
 expected_res(2,2*degX)=0.5;
-%geben:
+%
 [ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
@@ -207,11 +210,10 @@ gridX = -1:0.02:1;
 gridY = -1:0.02:1;
 [X,Y] = meshgrid(gridX,gridY);
  f= cos(2*pi*(Y)/(gridX(end)-gridX(1))); 
-%muss laut   spatialBasis_(,,:)=reshape(cos(2*pi*(X*()+Y*(k2-1))), nPts,1); 
-% Koeffs 
+%coeffs according to above scheme: 
 expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+1)= 1.0;
-%geben:
+%
 [ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
@@ -233,11 +235,10 @@ gridX = -1:0.02:1;
 gridY = -1:0.02:1;
 [X,Y] = meshgrid(gridX,gridY);
  f= cos(4*pi*(Y)/(gridX(end)-gridX(1))); 
-%muss laut   spatialBasis_(,,:)=reshape(cos(2*pi*(X*()+Y*(k2-1))), nPts,1); 
-% Koeffs 
+%coeffs according to above scheme: 
 expected_res = zeros(degX, 4*degY+1);
 expected_res(3,2*degX+1)= 1.0;
-%geben:
+%
 [ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
@@ -259,8 +260,7 @@ gridX = -1:0.02:1;
 gridY = -1:0.02:1;
 [X,Y] = meshgrid(gridX,gridY);
  f=cos(2*pi* ((X)/(gridX(end)-gridX(1))+Y/(gridY(end)-gridY(1)))); 
-%muss laut   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(2*pi*(X*(k1-1)+Y*(k2-1))), nPts,1); 
-%einen Koeff 
+%coeffs according to above scheme: 
 expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+3)=1.0;
 expected_res(2,2*degX-1)=0.0;
@@ -287,12 +287,11 @@ gridX = -1:0.02:1;
 gridY = -1:0.02:1;
 [X,Y] = meshgrid(gridX,gridY);
  f=cos(2*pi* ((X)/(gridX(end)-gridX(1))-Y/(gridY(end)-gridY(1)))); 
-%muss laut   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(2*pi*(X*(k1-1)+Y*(k2-1))), nPts,1); 
-%einen Koeff 
+%coeffs according to above scheme: 
 expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+3)=0.0;
 expected_res(2,2*degX-1)=1.0;
-%geben:
+%
 [ coeff_, spatialBase_]=expand_field_fourier2d(  f, degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
@@ -315,11 +314,10 @@ gridX = -1:0.02:1;
 gridY = -1:0.02:1;
 [X,Y] = meshgrid(gridX,gridY);
  f=sin(2*pi* ((X)/(gridX(end)-gridX(1))+Y/(gridY(end)-gridY(1)))); 
-%muss laut   spatialBasis_(k1, 2*k2-1,:)=reshape(cos(2*pi*(X*(k1-1)+Y*(k2-1))), nPts,1); 
-%einen Koeff 
+%coeffs according to above scheme: 
 expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+4)=1.0;
-%geben:
+%
 [ coeff_, spatialBase_]=expand_field_fourier2d(  f, degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
@@ -360,7 +358,7 @@ surf(backTrafo);
 
 abstol=15/min(size(gridX,2),size(gridY,2));
 reltol=1/min(size(gridX,2),size(gridY,2));
-
+%TODO!
 %assert_equals( coeff_, expected_res, '2d-ft of cos(2*pi* ((X*3)/(gridX(end)-gridX(1))+Y*3/(gridY(end)-gridY(1))))','abstol', abstol,...
 %    'reltol', reltol);%???'fuzzy', true );
 assert_equals( backTrafo, f...
