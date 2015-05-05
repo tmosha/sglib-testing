@@ -16,8 +16,9 @@ stiffness_func=funcreate(@pdetool_stiffness_matrix, pos, els, @funarg);
 % define stochastic expansion parameters
 
 p_k=get_base_param( 'p_k', 2 );
-m_k=get_base_param( 'm_k', 10 );
-l_k=get_base_param( 'l_k', 10 );
+m_k=get_base_param( 'm_k', 3);%10 );%10 gives multiindex beyound the range of data type
+%6 needs more time than you have
+l_k=get_base_param( 'l_k', 3 );
 %-------------------Beispiel:
 % define the distribution (name, parameters, shift, scale)
 dist_k=get_base_param( 'dist_k', gendist_create('beta', {4,2}, 'shift', 0.1) );
@@ -87,8 +88,8 @@ else
 end
 p_u=get_base_param('p_u', max([p_k,p_f,p_g]));
 
-%[I_k,I_f,I_g,I_u]=multiindex_combine( {I_k, I_f, I_g}, p_u );
-[I_k,I_f,I_g,I_u]=multiindex_combine( {pcBase_k{2}, I_f, I_g}, p_u );
+[I_k,I_f,I_g,I_u]=multiindex_combine( {I_k, I_f, I_g}, p_u );
+%??[I_k,I_f,I_g,I_u]=multiindex_combine( {pcBase_k{2}, I_f, I_g}, p_u );
 M=size(I_u,1);
 I_RHS=I_u; % for 3way this would be I_k
 I_OP=I_u;  % for 3way this would be combine( I
@@ -110,7 +111,7 @@ G=kl_to_ctensor( g_i_k, g_k_beta );
 % create tensor operators
 verbosity=get_base_param( 'verbosity', 1 );
 t_klop=tic;
-K=kl_pce_compute_operator_fast(spatialFcts_i_k, meanFreeCoeff, I_k, I_OP, stiffness_func, 'tensor');
+K=kl_pce_compute_operator_fast(spatialBase_i_k, FourierCoeff_k_alpha, I_k, I_OP, stiffness_func, 'tensor');
 %K=kl_pce_compute_operator_fast(k_i_k, k_k_alpha, I_k, I_OP, stiffness_func, 'tensor');
 %KL-EVs, KL-Koeffs. Inputs muessen keine KL-Zerlegung sein, bloss raeuml. Basis
 %??K=compute_pce_operator( K_I_IOTA, I_K, I_U, STIFFNESS_FUNC, FORM)

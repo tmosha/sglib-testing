@@ -42,7 +42,7 @@ a1Dist =gendist_create('beta', {4,2}, 'shift', 0.1)% );
 %r_k_alpha: Coefficients w.r.t. KL EF base with some extra block due to first EV  
 a2Dist =gendist_create('beta', {4,2}, 'shift', 0.1)% );
 %a_alpha: Koeffs(x) der Reihe, V1 - Basisfkt'en
-[pcCoeff2, pcBase2_] = gpc_param_expand(a2Dist, 'H', 'p', 3);%,);
+[pcCoeff2, pcBase2] = gpc_param_expand(a2Dist, 'H', 'p', 3);%,);
 
 a3Dist =gendist_create('beta', {4,2}, 'shift', 0.1)% );
 [pcCoeff3, pcBase3] = gpc_param_expand(a3Dist, 'H', 'p', 3);%,);

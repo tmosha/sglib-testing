@@ -107,7 +107,7 @@ g_j_i=kl_solve_evp( C_gam, G_N, m_gam, kl_options );
 %[pos,els]=load_pdetool_geom( 'lshape', 'numrefine', 1 );
 %plot_field(pos, els,g_j_i(:,2))
 % Step 5: transform gam(pos) into u
-[r_j_alpha,I_r]=pce_transform_multi( g_j_i, rho_k ); %trafo Koeffs rho der PC von rho_stdnor_func in KL
+[r_j_alpha,I_r]=pce_transform_multi( g_j_i, rho_k ); %Koeffs rho der PC von rho_stdnor_func in KL
 %
 %I_r Multiindex m_gam KL-Basisfkt g_i_j(x) \times p PC-Bas-Fcts = 66
 %product space base Fcts

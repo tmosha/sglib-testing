@@ -1,4 +1,4 @@
-function [ coeff_,  spatialBasis_]=expandFieldFourier2dcentered( ... 
+function [ coeff_,  spatialBasis_]=expandFieldFourier2dCentered( ... 
     func, degX, degY) %  varargin )
 % EXPAND_FIELD_Fourier Compute the Fourier expansion of an arbitrary real(!) Fct.
 %   adapted to sglib context.
@@ -106,17 +106,7 @@ coeff_( 1:degY,2*degX    )  =                  (imag(...%-FCentered(midY+1:1:mid
                             [0;FCentered(midY:-1:midY-degY+2, midX+1)]))/nPts;%???+2)))/nPts; %sinus     
 
 %Remark: columns 1 and end belong to cosine().
-if 0
-%zu unuebersichtlich, unklar, wie gerade u ungerade Anz. Pkte zu behandeln ist:    
-for i=1: 2*degX+1
-   % prereal=(F+F');%(1:degX, i)
- coeff_(1:degY,mod(2*degX + 2*(i-1),4*degX )+1)  =...
-                (real(F(1:degY, i)+F(end:-1:end-degY+1, end-i+1)))/nPts; %cosinus
- coeff_(1:degY,mod(2*degX +2*(i-1)+1, 4*degX)+1)    =...
-                (imag(F(1:degY, i)-F(end:-1:end-degY+1, end-i+1)))/nPts; %sinus
-end
-end
-%centered - (0,0) is middle of domain - data assumed!
+
 [xMesh,yMesh] = meshgrid(linspace(-1,1,nX),linspace(-1,1,nY));%y/(y(end)-y(1)));
 spatialBasis_= zeros(degY,2*degX+1,nPts);
 %spatialBasis_(:,1)=1;
@@ -134,18 +124,4 @@ for k1=1:1:degY
    %M_alpha(k1,:)= [k1,k2]
  end
 end
-%spatialBasis_(1, 2,:) = zeros(nPts,1);
-% Step 2: calculate <gam_i gam_j> from <u_i u_j>
-%C_r=covariance_matrix( pos, cov_r_func );
-%if ~isempty( cov_gam_func )
-%    C_gam=covariance_matrix( pos, cov_gam_func );
-%else
-%    if isstruct(transform_options)
-%        transform_options=struct2options(transform_options);
-%    end
-%    C_gam=transform_covariance_pce( C_r, rho_k, transform_options{:} );
-%end 
-
-% Step 3: Calculate lamda_i and r_i (i.e. do KL expansion)
-% g contains the product sqrt(lambda_i)*g_i of the KL of gamma
  
