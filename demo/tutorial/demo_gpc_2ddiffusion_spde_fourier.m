@@ -143,7 +143,7 @@ toc; fprintf( 'Flag: %d, iter: %d, relres: %g \n', flag, info.iter, info.relres 
 u_i_alpha=apply_boundary_conditions_solution( Ui_mat, ctensor_to_array(G), P_I, P_B );
 [u,xi]=pce_field_realization( u_i_alpha, I_u );
 
-[k]=kl_pce_field_realization(spatialFcts_i_k, meanFreeCoeff, I_k, xi );
+[k]=kl_pce_field_realization(spatialBase_i_k, FourierCoeff_k_alpha, I_k, xi );
 [f]=kl_pce_field_realization( f_i_k, f_k_alpha, I_f, xi );
 [g]=kl_pce_field_realization( g_i_k, g_k_alpha, I_g, xi );
 

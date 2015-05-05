@@ -124,4 +124,4 @@ for k1=1:1:degY
    %M_alpha(k1,:)= [k1,k2]
  end
 end
- 
+%Remark - TODO: This delivers one column too many - last Basis should be the cosine
