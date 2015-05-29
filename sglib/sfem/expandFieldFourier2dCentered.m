@@ -11,7 +11,7 @@ function [ coeff_,  spatialBasis_]=expandFieldFourier2dCentered( ...
 %       Note:  Independently of degX and degY, all values of FUNC are considered!
 %   TODO: Sparse matrix for the fourier base plus input argument determining the 
 %   limit for coefiicients whose bases should be considered.
-%  by (DIFFERENTLY from MATLAB Standard function fft2() by 1/N!)
+%  by (DIFFERENTLY from MATLAB Standard function fft2() by 1/N  !)
 %                    N
 %    X(k) =  2* 1/N   sum  x(n)*exp(-j*2*pi*<k,x>)/N), 1 <= k <= N.
 %                    n=1
@@ -85,7 +85,7 @@ end
 
 midY = floor(size(FCentered,1)/2);
 midX = floor(size(FCentered,2)/2);
-pause
+
 coeff_(:,2*degX+1)=(real(FCentered(midY+1:1:midY+degY,midX+1)+[0; FCentered(midY:-1:midY-degY+2, midX+1)]))/nPts; %konst. Coeff
 for iX=1: degX
         coeff_( 1:degY,2*degX + 2*iX)  =...

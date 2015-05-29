@@ -1,4 +1,5 @@
 clear
+%implements flow problem with stochastic coeff, rhs and bounary values on L-shaped domain. Diffusion Coefficient is given intervalwise  by three stochastic functions.
 
 %% load or create the geomatry
 % !!! pos, els, G_N (kann auch stattdessen I sein) und stiffness_func
@@ -57,6 +58,7 @@ plot_samples(a_i_samples); enhance_plot;
 a_i_samples = gpc_sample(pcCoeff_k_alpha, pcBase_k, 30000, 'mode', 'qmc');
 plot_samples(a_i_samples); enhance_plot;
 
+%define three zones
 if 1
 spatialFcts_i_k = zeros(size(pos,2),size(pcCoeff_k_alpha,1))
 for i =1:size(pos, 2)

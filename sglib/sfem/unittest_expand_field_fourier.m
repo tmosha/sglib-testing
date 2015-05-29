@@ -23,7 +23,7 @@ munit_set_function( 'expand_field_fourier' );
 
 %[K,K_f]=compute_fft1d( );
 %geht: 
-case_indexing_fft2d();
+%case_indexing_fft2d();
 ftGaussianCov(1,0.25)
 %ftGaussianCov(1,0.5)
 %ftGaussianCov(1,1)
@@ -97,7 +97,6 @@ end
 end
 
 
-
 function [spatialBase_, coeff_]=case_indexing_fft2d()
 %Testig the ordering of spatial Basis functions acc. to
 %    ...  cos(-x)   0           1,          0,      cos x,      sin x,      sin2x... 
@@ -120,7 +119,7 @@ reltol=1/min(size(gridX,2),size(gridY,2));
 if 1
 expected_res = zeros(degY,4*degX+1);
 expected_res(1,2*degX+1)=1;
-[ coeff_, spatialBase_]=expand_field_fourier2d(  y,  degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  y,  degX, degY);
 
 %backTrafo = sum(Coeff_.*spatialBasis_;
 %surf()
@@ -144,7 +143,7 @@ expected_res = zeros(degX, 4*degY+1);
 expected_res(1,2*degX+1+3)=0.5;
 expected_res(1,2*degX+1-3)=-0.5;
 %
-[ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
 surf(reshape(backTrafo,size(X)));
@@ -168,7 +167,7 @@ expected_res = zeros(degX, 4*degY+1);
 expected_res(1,2*degX+1+6)=0.5;
 expected_res(1,2*degX+1-6)=0.5;
 %
-[ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
 
 surf(reshape(spatialBase_(1,2*degX+7,:),size(X)))
 backTrafo=inverseFourier(coeff_, spatialBase_);
@@ -192,7 +191,7 @@ expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+2)=0.5;
 expected_res(2,2*degX)=0.5;
 %
-[ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
 surf(reshape(backTrafo,size(X)));
@@ -214,7 +213,7 @@ gridY = -1:0.02:1;
 expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+1)= 1.0;
 %
-[ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
 surf(reshape(backTrafo,size(X)));
@@ -239,7 +238,7 @@ gridY = -1:0.02:1;
 expected_res = zeros(degX, 4*degY+1);
 expected_res(3,2*degX+1)= 1.0;
 %
-[ coeff_, spatialBase_]=expand_field_fourier2d(  f,  degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
 surf(reshape(backTrafo,size(X)));
@@ -265,7 +264,7 @@ expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+3)=1.0;
 expected_res(2,2*degX-1)=0.0;
 %geben:
-[ coeff_, spatialBase_]=expand_field_fourier2d(  f, degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f, degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
 surf(reshape(backTrafo,size(X)));
@@ -292,7 +291,7 @@ expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+3)=0.0;
 expected_res(2,2*degX-1)=1.0;
 %
-[ coeff_, spatialBase_]=expand_field_fourier2d(  f, degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f, degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
 surf(reshape(backTrafo,size(X)));
@@ -318,7 +317,7 @@ gridY = -1:0.02:1;
 expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+4)=1.0;
 %
-[ coeff_, spatialBase_]=expand_field_fourier2d(  f, degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f, degX, degY);
 
 backTrafo=inverseFourier(coeff_, spatialBase_);
 surf(reshape(backTrafo,size(X)));
@@ -350,7 +349,7 @@ surf(f);
 
 
 %geben:
-[ coeff_, spatialBase_]=expand_field_fourier2d(  f, gridX, gridY, degX, degY);
+[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f, degX, degY);
 surf(coeff_)
 backTrafo=inverseFourier(coeff_, spatialBase_);
 backTrafo = reshape(backTrafo,size(X));
