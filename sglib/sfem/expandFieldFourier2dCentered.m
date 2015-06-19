@@ -1,4 +1,4 @@
-function [ coeff_,  spatialBasis_]=expandFieldFourier2dCentered( ... 
+function [ coeff_, K,phase]=expandFieldFourier2dCentered( ... 
     func, degX, degY) %  varargin )
 % EXPAND_FIELD_Fourier Compute the Fourier expansion of an arbitrary real(!) Fct.
 %   adapted to sglib context.
@@ -107,6 +107,36 @@ coeff_( 1:degY,2*degX    )  =                  (imag(...%-FCentered(midY+1:1:mid
 
 %Remark: columns 1 and end belong to cosine().
 
+%besser: Format
+%sin_rep_k = [A_k; w_k; p_k]; %pk - Phase, hier 0 (cos) oder -pi/2 (sin)
+%evaluation from -1 to 1
+dim=2;
+K= zeros(degY,4*degX+1,dim);
+phase= zeros(degY,4*degX+1,dim);
+%spatialBasis_(:,1)=1;
+for k1=1:1:degY
+ for k2=1:1:degX
+    kX = k2-degX-1;
+   K(k1, 2*k2-1,:)  = [kX, (k1-1)]; %reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
+   K(k1, 2*k2,:)    = [(kX+1),(k1-1)]; %reshape(sin(pi*(xMesh*(kX+1)+yMesh*(k1-1))), nPts,1);
+   phase(k1, 2*k2,:)    = -[ 0.5,0.0]; %lets see - cosine knows only one phase shift
+   
+ end
+ K(k1, 2*degX+1,:) = [0, (k1-1)];
+ for k2=degX+1:1:2*degX %neu: v. deg+2 an
+    kX = k2-degX-1;
+    K(k1, 2*k2,:)  =[kX, (k1-1)];%reshape(sin(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1);
+    K(k1, 2*k2+1,:)=[kX+1, (k1-1)]; %reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
+    phase(k1, 2*k2,:)    = -[0.5,0.0];
+
+%   K(k1, 2*k2-1,:)=[kX, (k1-1)]; %reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
+%   K(k1, 2*k2,:)  =[kX, (k1-1)];%reshape(sin(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1);
+%   phase(k1, 2*k2,:)    = -[0.5,0.5];
+   %M_alpha(k1,:)= [k1,k2]
+ end
+end
+%zu debug-zwecken noch nützlich:
+if 0
 [xMesh,yMesh] = meshgrid(linspace(-1,1,nX),linspace(-1,1,nY));%y/(y(end)-y(1)));
 spatialBasis_= zeros(degY,2*degX+1,nPts);
 %spatialBasis_(:,1)=1;
@@ -125,3 +155,4 @@ for k1=1:1:degY
  end
 end
 %Remark - TODO: This delivers one column too many - last Basis should be the cosine
+end

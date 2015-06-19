@@ -23,7 +23,7 @@ munit_set_function( 'expand_field_fourier' );
 
 %[K,K_f]=compute_fft1d( );
 %geht: 
-%case_indexing_fft2d();
+case_indexing_fft2d();
 ftGaussianCov(1,0.25)
 %ftGaussianCov(1,0.5)
 %ftGaussianCov(1,1)
@@ -97,14 +97,15 @@ end
 end
 
 
+
 function [spatialBase_, coeff_]=case_indexing_fft2d()
 %Testig the ordering of spatial Basis functions acc. to
 %    ...  cos(-x)   0           1,          0,      cos x,      sin x,      sin2x... 
 %    ...  cos(-x+y) sin(y)     cos y       sin y   cos(x+y)    sin(x+y)    cos(2x +y)
 %    ...cos(-2x+2y) sin(2y)    cos (2y)    sin(2y) cos(2x+2y)...
 %and calculation and corresponting indexing of centered fft coeffs. 
-gridX = 0:0.02:4;
-gridY = 0:0.02:3;
+gridX = 0:0.2:4;
+gridY = 0:0.15:3;
 degX=10
 degY=10
 %implemented in expand_field_fourier2d:
@@ -119,13 +120,29 @@ reltol=1/min(size(gridX,2),size(gridY,2));
 if 1
 expected_res = zeros(degY,4*degX+1);
 expected_res(1,2*degX+1)=1;
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  y,  degX, degY);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  y,  degX, degY);
+%k=pi*K;phase=pi*phase;
+[X,Y] = meshgrid(gridX,gridY);
+spatialBase =evalBase(K,phase, ...
+    2*reshape((X - X(1,1))/(X(end,end)-X(1,1)),1,[])-1,...
+    2*reshape((Y - Y(1,1))/(Y(end,end)-Y(1,1)),1,[])-1);
+%reshape(X, 1,[]),reshape(Y, 1,[]));
+dbstop if error
+backTrafo=inverseFourier(coeff_, X,Y);
+surf(reshape(spatialBase(1,2*degX+1,:),size(X)));
+%pause
+%surf(reshape(spatialBase(1,2*degX+2,:),size(X)));
+%pause
+%surf(reshape(spatialBase(1,2*degX+3,:),size(X)));
+%pause
+%surf(reshape(spatialBase(1,2*degX+4,:),size(X)));
+%pause
 
-%backTrafo = sum(Coeff_.*spatialBasis_;
-%surf()
 assert_equals( coeff_, expected_res, '2d-ft of const f=1','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
-assert_equals( spatialBase_(1,2*degX+1,:), ones(1,1,size(gridX,2)*size(gridY,2))...
+assert_equals( backTrafo, ones(size(backTrafo)), 'Backtrafo of 2d-ft of const f=1','abstol', abstol,...
+    'reltol', reltol);%???'fuzzy', true );
+assert_equals( spatialBase(1,2*degX+1,:), ones(1,1,size(gridX,2)*size(gridY,2))...
         , '2d-ft of const','abstol', abstol...
         , 'reltol', reltol);
 end
@@ -136,18 +153,22 @@ clear y Coeff_  spatialBasis_;
 %centered!
 gridX = -1:0.02:1;
 gridY = -1:0.02:1;
-[X,~] = meshgrid(gridX,gridY);
+[X,Y] = meshgrid(gridX,gridY);
  f= sin(2*pi*(X)/(gridX(end)-gridX(1))); 
 %coeffs according to above scheme: 
 expected_res = zeros(degX, 4*degY+1);
 expected_res(1,2*degX+1+3)=0.5;
 expected_res(1,2*degX+1-3)=-0.5;
 %
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
-
-backTrafo=inverseFourier(coeff_, spatialBase_);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f,  degX, degY);
+%k=pi*K;phase=pi*phase;
+spatialBase_ =evalBase(K,phase, reshape(X, 1,[]),reshape(Y, 1,[]));
+backTrafo=inverseFourier(coeff_, X,Y);
 surf(reshape(backTrafo,size(X)));
+surf(reshape(spatialBase_(1,2*degX+1-3,:),size(X)));
 assert_equals( coeff_, expected_res, '2d-ft of sin(2*pi*(X)/(gridX(end)-gridX(1))','abstol', abstol,...
+    'reltol', reltol);%???'fuzzy', true );
+assert_equals( backTrafo, reshape(f,[],1), 'Backtrafo of sin(2*pi*(X)/(gridX(end)-gridX(1))','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
 assert_equals( spatialBase_(1,2*degX+1+3,:), reshape(f, 1,1,[])...
         , '2d-ft of sine','abstol', abstol...
@@ -157,7 +178,7 @@ end
 %3.------------------------------------------------------------------------
 
 if 1
-clear y Coeff_  spatialBasis_;
+clear y Coeff_  spatialBasis_ X;
 gridX = -1:0.02:1;
 gridY = -1:0.02:1;
 [X,~] = meshgrid(gridX,gridY);
@@ -167,10 +188,10 @@ expected_res = zeros(degX, 4*degY+1);
 expected_res(1,2*degX+1+6)=0.5;
 expected_res(1,2*degX+1-6)=0.5;
 %
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f,  degX, degY);
 
 surf(reshape(spatialBase_(1,2*degX+7,:),size(X)))
-backTrafo=inverseFourier(coeff_, spatialBase_);
+backTrafo=inverseFourier(coeff_, X,Y);
 surf(reshape(backTrafo,size(X)));
 assert_equals( coeff_, expected_res, '2d-ft of cos(2*pi*(X*3)/(gridX(end)-gridX(1))','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
@@ -191,9 +212,9 @@ expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+2)=0.5;
 expected_res(2,2*degX)=0.5;
 %
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f,  degX, degY);
 
-backTrafo=inverseFourier(coeff_, spatialBase_);
+backTrafo=inverseFourier(coeff_, X,Y);
 surf(reshape(backTrafo,size(X)));
 assert_equals( coeff_, expected_res, 'centered 2d-ft of sin(2*pi*(Y)/(gridX(end)-gridX(1))','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
@@ -213,9 +234,9 @@ gridY = -1:0.02:1;
 expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+1)= 1.0;
 %
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f,  degX, degY);
 
-backTrafo=inverseFourier(coeff_, spatialBase_);
+backTrafo=inverseFourier(coeff_, X,Y);
 surf(reshape(backTrafo,size(X)));
  assert_equals( coeff_, expected_res, 'centered 2d-ft of cos(2*pi*(Y)/(gridX(end)-gridX(1))','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
@@ -238,9 +259,9 @@ gridY = -1:0.02:1;
 expected_res = zeros(degX, 4*degY+1);
 expected_res(3,2*degX+1)= 1.0;
 %
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f,  degX, degY);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f,  degX, degY);
 
-backTrafo=inverseFourier(coeff_, spatialBase_);
+backTrafo=inverseFourier(coeff_, X,Y);
 surf(reshape(backTrafo,size(X)));
  assert_equals( coeff_, expected_res, 'centered 2d-ft of cos(4*pi*(Y)/(gridX(end)-gridX(1))','abstol', abstol,...
     'reltol', reltol);%???'fuzzy', true );
@@ -264,9 +285,9 @@ expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+3)=1.0;
 expected_res(2,2*degX-1)=0.0;
 %geben:
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f, degX, degY);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f, degX, degY);
 
-backTrafo=inverseFourier(coeff_, spatialBase_);
+backTrafo=inverseFourier(coeff_, X,Y);
 surf(reshape(backTrafo,size(X)));
 
 assert_equals( coeff_, expected_res, '2d-ft of cos(2*pi* ((X)/(gridX(end)-gridX(1))+Y/(gridY(end)-gridY(1))))'...
@@ -291,9 +312,9 @@ expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+3)=0.0;
 expected_res(2,2*degX-1)=1.0;
 %
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f, degX, degY);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f, degX, degY);
 
-backTrafo=inverseFourier(coeff_, spatialBase_);
+backTrafo=inverseFourier(coeff_, X,Y);
 surf(reshape(backTrafo,size(X)));
 
 assert_equals( coeff_, expected_res, '2d-ft of cos(2*pi* ((X)/(gridX(end)-gridX(1))-Y/(gridY(end)-gridY(1))))'...
@@ -317,9 +338,9 @@ gridY = -1:0.02:1;
 expected_res = zeros(degX, 4*degY+1);
 expected_res(2,2*degX+4)=1.0;
 %
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f, degX, degY);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f, degX, degY);
 
-backTrafo=inverseFourier(coeff_, spatialBase_);
+backTrafo=inverseFourier(coeff_, X,Y);
 surf(reshape(backTrafo,size(X)));
 
 assert_equals( coeff_, expected_res, '2d-ft of sin(2*pi* ((X)/(gridX(end)-gridX(1))+Y/(gridY(end)-gridY(1))))'...
@@ -349,9 +370,9 @@ surf(f);
 
 
 %geben:
-[ coeff_, spatialBase_]=expandFieldFourier2dCentered(  f, degX, degY);
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f, degX, degY);
 surf(coeff_)
-backTrafo=inverseFourier(coeff_, spatialBase_);
+backTrafo=inverseFourier(coeff_, X,Y);
 backTrafo = reshape(backTrafo,size(X));
 surf(backTrafo);
 
@@ -366,7 +387,56 @@ assert_equals( backTrafo, f...
 end
 
 
-function [backTrafo]=inverseFourier(coeff, spatialBase)
+
+%evaluates arbitrary spatial trigonometric base.
+%Caller has to take care that X and Y are scaled and shifted to interval
+%[-1,1] -this function has no chance to do that for arbitrary points!
+%TODO: Think of giving interval of period as arg!
+function [spatialBase]=evalBase(k, phase, X, Y)
+for ik=1:size(k,1)
+    for jk=1:size(k,2) %reshape(k(ik,jk,1:2),1,[])*[X;Y]
+     spatialBase(ik,jk,:)=cos( pi*( k(ik,jk,1)*X+phase(ik,jk,1) + k(ik,jk,2)*Y+ phase(ik,jk,2)));%[X';Y']+phase(ik,jk,1:2)));
+    end
+end
+end
+%%___________________________________________________________________
+%fourier function index k and phaseshift is generated here again. 
+%Logics: Demand is defined in the tests, and demand defines ordering of
+%Basis functions. Assumptions on ordering are allowed for caller. This test
+%should make this klear.
+
+function [backTrafo]=inverseFourier(coeff, Xmeshgrid, Ymeshgrid)
+dim=2;
+degX=floor(size(coeff,2)/4);
+degY=size(coeff,1);
+K= zeros(degY,4*degX+1,dim);
+phase= zeros(degY,4*degX+3,dim);
+%spatialBasis_(:,1)=1;
+for k1=1:1:degY
+ for k2=1:1:degX
+    kX = k2-degX-1;
+   K(k1, 2*k2-1,:)  = [kX, (k1-1)]; %reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
+   K(k1, 2*k2,:)    = [(kX+1),(k1-1)]; %reshape(sin(pi*(xMesh*(kX+1)+yMesh*(k1-1))), nPts,1);
+   phase(k1, 2*k2,:)    = [-0.5,0.0];
+   %M_alpha(k1,:)= [k1,k2]
+ end
+ K(k1, 2*degX+1,:) = [0, (k1-1)];
+ for k2=degX+1:1:2*degX %neu: v. deg+2 an
+    kX = k2-degX-1;
+    K(k1, 2*k2,:)  =[kX, (k1-1)];%reshape(sin(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1);
+    K(k1, 2*k2+1,:)=[kX+1, (k1-1)]; %reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
+    phase(k1, 2*k2,:)    = [-0.5,0.0];
+
+%   K(k1, 2*k2-1,:)=[kX, (k1-1)]; %reshape(cos(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1); 
+%   K(k1, 2*k2,:)  =[kX, (k1-1)];%reshape(sin(pi*(xMesh*(kX)+yMesh*(k1-1))), nPts,1);
+%   phase(k1, 2*k2,:)    = [0.5,0.5];
+   %M_alpha(k1,:)= [k1,k2]
+ end
+end
+k=K;%TODO
+spatialBase =evalBase(k, phase, ...
+    2*reshape((Xmeshgrid - Xmeshgrid(1,1))/(Xmeshgrid(end,end)-Xmeshgrid(1,1)),1,[])-1,...
+    2*reshape((Ymeshgrid - Ymeshgrid(1,1))/(Ymeshgrid(end,end)-Ymeshgrid(1,1)),1,[])-1);
 backTrafo=zeros(size(spatialBase,3),1);%stumpf ist trumpf
 for iSpat=1:size(spatialBase,3)
     for iX=1:size(coeff,1)
@@ -376,6 +446,8 @@ for iSpat=1:size(spatialBase,3)
     end
 end
 end
+
+%%______________________________________________________________________________
 
 function [K,K_f]=compute_operators( p_k, m_f, p_f, p_u, lex_sort )
 
