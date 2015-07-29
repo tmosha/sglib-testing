@@ -69,7 +69,11 @@ else
 end  
 %umstrukturieren der
 
-[EV_C_Gam, spatialBasis_]=expandFieldFourier2dCentered(  C_gam,  degKL, degKL);
+[EV_C_Gam,  K, phase]=expandFieldFourier2dCentered(  C_gam,  degKL, degKL);
+%hier müsste noch hin: die Basen mit den grössten coeffs auswaehlen
+spatialBase_ =evalBase(K,phase, pos(1,:), pos(2,:));
+
+
 % ist separate Wahl v. degX u degY sinnvoll?
 
 % Step 3: Calculate lamda_i and r_i (i.e. do Fourier (KL) expansion)
@@ -78,12 +82,12 @@ kl_options.correct_var=true;
 %g_j_i=kl_solve_evp( C_gam, G_N, m_gam, kl_options ); bekannt
 %restructuring for compatibility
 EV_C_Gam_flat=zeros(1,size(EV_C_Gam,1)*size(EV_C_Gam,2));
-spatialBasis_flat=zeros(size(spatialBasis_,3), size(EV_C_Gam,1)*size(EV_C_Gam,2));
+spatialBasis_flat=zeros(size(pos, 2), size(EV_C_Gam,1)*size(EV_C_Gam,2));
 for i=1:size(EV_C_Gam,1)
     for j=1:size(EV_C_Gam,2)
         flat_ind = (i-1)*size(EV_C_Gam,1)+j;
         EV_C_Gam_flat(flat_ind) = EV_C_Gam(i,j);
-        spatialBasis_flat(:,flat_ind) =  reshape( spatialBasis_(i,j,:), [],1);
+        spatialBasis_flat(:,flat_ind) = spatialBase_(i,j,:);% reshape( spatialBasis_(i,j,:), [],1);
     end
 end
 %ziehen EV in die Basis (f. Kompatibilitaet m. pce_transform_multi):

@@ -21,7 +21,7 @@ function unittest_expand_field_fourier
 clear;
 munit_set_function( 'expand_field_fourier' );
 
-%[K,K_f]=compute_fft1d( );
+compute_fft1d( );
 %geht: 
 case_indexing_fft2d();
 ftGaussianCov(1,0.25)
@@ -33,12 +33,39 @@ ftGaussianCov(1,0.25)
 %bis jetzt kein Sinn in dieser Gliederung - kann evtl aufgegeben werden.
 end
 
-function [spatialBasis_, Coeff_]=compute_fft1d()
-pos = 0:0.02:4;
+function compute_fft1d()
+
+gridX = -1:0.02:1;
+gridY = [0.0,0.0];
+abstol=2.0/size(gridX,2);
+reltol=1/100.0;
+
+degX=10
+degY=1
+%implemented in expand_field_fourier2d:
+degX=min(degX, size(gridX,2)/2) 
+[X,Y] = meshgrid(gridX,gridY);
+ f= cos(pi*2*(X*3)/(gridX(end)-gridX(1))); 
+%coeffs according to above scheme: 
+expected_res = zeros(degY, 4*degX+1);
+expected_res(1,2*degX+1+6)=0.5;
+expected_res(1,2*degX+1-6)=0.5;
+%
+[ coeff_, K, phase]=expandFieldFourier2dCentered(  f,  degX, degY);
+
+spatialBase_ =evalBase(K,phase, reshape(X, 1,[]),reshape(Y, 1,[]));
+surf(reshape(spatialBase_(1,2*degX+7,:),size(X)))
+backTrafo=inverseFourier(coeff_, X,Y);
+surf(reshape(backTrafo,size(X)));
+assert_equals( coeff_, expected_res, '2d-ft used for 1d-ft of cos(2*pi*(X*3)/(gridX(end)-gridX(1))','abstol', abstol,...
+    'reltol', reltol);%???'fuzzy', true );
+assert_equals( spatialBase_(1,2*degX+7,:), reshape(f, 1,1,[])...
+        , '2d-ft of cosine','abstol', abstol...
+        , 'reltol', reltol);
+
+if 0
 %1.----------------
 y = ones(size(pos,2),1); %cos(i*2*pi*pos)
-abstol=15/size(pos,2)
-reltol=1/size(pos,2)
 if 1
 deg=size(pos,2)
 [ Coeff_, spatialBasis_]=expand_field_fourier(  y, pos, deg);
@@ -94,6 +121,8 @@ expected_res(5)=1;
 assert_equals( Coeff_, expected_res, 'ft of sin(4*pi*pos)','abstol', abstol,...
     'reltol', reltol);
 end
+
+end %switch
 end
 
 
@@ -388,17 +417,7 @@ end
 
 
 
-%evaluates arbitrary spatial trigonometric base.
-%Caller has to take care that X and Y are scaled and shifted to interval
-%[-1,1] -this function has no chance to do that for arbitrary points!
-%TODO: Think of giving interval of period as arg!
-function [spatialBase]=evalBase(k, phase, X, Y)
-for ik=1:size(k,1)
-    for jk=1:size(k,2) %reshape(k(ik,jk,1:2),1,[])*[X;Y]
-     spatialBase(ik,jk,:)=cos( pi*( k(ik,jk,1)*X+phase(ik,jk,1) + k(ik,jk,2)*Y+ phase(ik,jk,2)));%[X';Y']+phase(ik,jk,1:2)));
-    end
-end
-end
+
 %%___________________________________________________________________
 %fourier function index k and phaseshift is generated here again. 
 %Logics: Demand is defined in the tests, and demand defines ordering of
