@@ -1,4 +1,5 @@
 %must be such that funcall( mean_func, pos ) works.
+%gives randum values with means given by coeff[1,2,3] below - so means are not random.
 function [val] =  blockwise_const_coeff(pos)
 % FUNCREATE 
 %

@@ -1,0 +1,35 @@
+Folgende Auftraege werden verwirklicht:
+1. 2d-intervallweise konstanter Mittelwert des Diffusionskoeffizienten
+2. Spielen mit Kovarianzlaenge
+bei mean 
+0.1 0.2
+    0.3
+	-lc_k 0.1: 2-3wesentl. maxima, 2-3 minima, recht pickeliges Aussehen
+		Elapsed time is 0.085813 seconds.
+		Solving (gpcg): Elapsed time is 6.752534 seconds.
+		Flag: 1, iter: 100, relres: 3.0678 
+	-lc_k 0.001: sehr pickelig
+		Solving (gpcg): Elapsed time is 6.680859 seconds.
+		Flag: 1, iter: 100, relres: 31.3566 
+	-lc_k =  0.0000000000001
+		Solving (gpcg): Elapsed time is 6.894606 seconds.
+		Flag: 1, iter: 100, relres: 98.3749 
+
+Schwachpkt: negative coeffs koennen angenommen werden - Aussagen z. Loeserverhalten damit Unsinn. Nun ohne stkw. konst koeff..	
+	-lc_k 0.1: 	3-4wesentl. maxima, 2-3 minima, halbwegs glattes Aussehen
+	 Solving 	(gpcg): Elapsed time is 0.849823 seconds.
+	Flag: 0, iter: 12, relres: 5.49092e-07
+	lc_k = 0.05:5-6 pos. Extrema, aber halbwegs glatt.
+	Solving (gpcg): Elapsed time is 1.170506 seconds.
+	Flag: 0, iter: 17, relres: 9.58309e-07 
+	-lc_k =0.03: vereinzelte Extrema m. steilen Flanken,  
+	Solving (gpcg): Elapsed time is 1.306694 seconds.
+	Flag: 0, iter: 19, relres: 6.07624e-07 
+	-ls_k =0.01: vereinzelte Extrema m. steilen Flanken,  
+	Solving (gpcg): Elapsed time is 1.338036 seconds.
+	Flag: 0, iter: 19, relres: 4.63374e-07 
+	-ls_k =0.001: pickelig,  
+	Solving (gpcg): Elapsed time is 1.290944 seconds.
+	Flag: 0, iter: 19, relres: 4.63374e-07 
+
+=>keine echten Loeserprobleme.
