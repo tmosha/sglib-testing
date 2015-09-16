@@ -1,8 +1,11 @@
-function K=pdetool_stiffness_matrix( pos, els, k )
+function K=pdetool_stiffness_matrix( pos, els, k, varargin )
 % PDETOOL_STIFFNESS_MATRIX Compute stiffness matrix using the PDE Toolbox.
 %   K=PDETOOL_STIFFNESS_MATRIX(POS, ELS, K) computes the stiffness matrix
 %   from the mesh specified in POS and ELS using the PDE Toolbox and the
 %   coefficient field specified in K.
+%   Options:
+%   coeff_el: true - Coefficient field evaluated at simplex centers
+%               false - coefficient field given at grid points
 %
 % Notes:
 %   This function is only available if the PDE Toolbox is available and on
@@ -34,12 +37,26 @@ if nargin<3
     error('sglib:pdetool_stiffness_matrix', 'Not enough arguments. You''re probably using the old version of the function interface');
 end
 
-p=pos;
-t=[els; zeros(1, size(els,2))];
+options=varargin2options(varargin);
+[coeff_el,options]=get_option( options, 'coeff_el', 0 );
+check_unsupported_options(options, mfilename);
 
 % pde toolbox needs mean values in the center of each element
-cp=k';
-ct=sum(cp(t(1:3,:)),1)/3;
+t=[els; zeros(1, size(els,2))];
+if(coeff_el)
+    if ~(length(k)== size(els, 2))
+        %exception
+    end
+    ct=k';
+else
+     if ~(length(k)== size(pos, 2))
+     end
+     cp=k';
+    ct=sum(cp(t(1:3,:)),1)/3;
+end
+       
+p=pos;
+
 
 % call pde toolbox function
 K=assema(p,t,ct,0,0);
